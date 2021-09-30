@@ -1,0 +1,39 @@
+{% extends "base_generic.html" %}
+{%load i18n%}
+{% block content %}
+
+<p>{{article.name}}</p>
+<p>{{article.descr}}</p>
+<p>{{article.author}}</p>
+<p>{{article.category}}</p>
+<p>{{article.subcategory}}</p>
+<p>{{article.content}}</p>
+<p>{{article.rec}}</p>
+<p>{{article.rating}}</p>
+<p>{{article.comments_count}}</p>
+<p>{{article.likes_count}}</p>
+<p>{{article.date_created}}</p>
+<p>{{article.date_edit}}</p>
+<p>img{{article.images.img}}</p>
+<p>img{{article.images.article}}</p>
+<p>img{{article.images.alt}}</p>
+<img src="/media/{{article.images.img}}" alt="{{article.images.alt}}" width="50" height="60">
+
+<form method="post" action=".">
+    {%  csrf_token %}
+    {{ comment_form }}
+
+
+    <p><button type="submit">Сохранить</button></p>
+</form>
+{{comments.count}}
+   {% for c in comments %}
+      <li>
+          <p>{{c.author}}</p>
+        <p>{{c.text}}</p>
+      </li>
+      {% endfor %}
+
+
+
+{% endblock %}

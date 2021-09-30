@@ -1,0 +1,24 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<form method="get">
+        {{ filter.form.as_p }}
+        <input type="submit" value="Поиск"/>
+     </form>
+    <h1>Список постов</h1>
+
+    {% if article_list %}
+    <ul>
+
+
+      {% for art in article_list %}
+      <li>
+        <a href="{{ art.get_absolute_url }}">{{ art.name }}</a>
+      </li>
+      {% endfor %}
+
+
+    {% else %}
+      <p>Список проектов пуст</p>
+    {% endif %}</ul>
+{% endblock %}
