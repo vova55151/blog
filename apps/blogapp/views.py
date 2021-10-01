@@ -1,9 +1,12 @@
 # Create your views here.
+import statistics
+
 import django_filters
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, CreateView, ListView, UpdateView, DeleteView
+from django.views.generic.list import MultipleObjectMixin
 from django_filters import OrderingFilter
 from django_filters.views import FilterView
 
@@ -43,16 +46,8 @@ class ArticleListView(FilterView):
     """
     model = Article
     paginate_by = 16
-    template_name = 'article_list.html'
+    template_name = 'blogapp/article_list.html'
     filterset_class = Filter
-
-    def get_context_data(self, **kwargs):
-        """
-        Возвращает контекст с сортировкой и фильтр по ключевым словам
-        """
-        context = super().get_context_data(**kwargs)
-
-        return context
 
 
 class ArticleDetailView(DetailView, CreateView):
@@ -61,8 +56,8 @@ class ArticleDetailView(DetailView, CreateView):
     """
 
     model = Article
-    template_name = 'article_detail.html'
-    success_url = reverse_lazy('blogapp:home')  # TODO : сделать через 2 вьюхи ,передавая одну в шаблоне формы в action
+    template_name = 'blogapp/article_detail.html'
+    # success_url = reverse_lazy('blogapp:home')  # TODO : сделать через 2 вьюхи ,передавая одну в шаблоне формы в action
     form_class = CommentModelForm
 
     def form_valid(self, form):
@@ -70,8 +65,14 @@ class ArticleDetailView(DetailView, CreateView):
         comment_form.author = self.request.user
 
         comment_form.article = self.get_object()
+        # object_list = Comment.objects.filter(article=self.object)
+        # print(object_list)
+        # if object_list:
+        #     self.get_object().rating = statistics.mean([int(i.rating) for i in object_list])
+        #
+
         comment_form.save()
-        return super(ArticleDetailView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -85,6 +86,30 @@ class ArticleDetailView(DetailView, CreateView):
         context['comments'] = comments
 
         return context
+
+    # def get_context_data(self, **kwargs):
+    #     # qs = Article.objects.prefetch_related('comment_set').filter(article_name=self.object)
+    #     object_list = Comment.objects.filter(article=self.object, status='P')
+    #     if object_list:
+    #         rating = statistics.mean([i.comment_rating for i in object_list])
+    #     else:
+    #         rating = 0
+    #
+    #     context = super().get_context_data(object_list=object_list, **kwargs)
+    #     context['rating'] = rating
+    #     # context['form'] = CommentModelForm(initial={
+    #     #     'article': self.object,
+    #     #     'comment_name': f'{self.request.user.first_name} {self.request.user.last_name}',
+    #     # })
+    #     if self.request.POST:
+    #         context['comment_form'] = self.form_class(self.request.POST)
+    #     else:
+    #         context['comment_form'] = CommentModelForm()
+    #
+    #     return context
+
+    def get_success_url(self):
+        return reverse_lazy('blogapp:detail', kwargs={'slug': self.get_object().slug})
 
 
 # class CommentCreateView(CreateView):
@@ -125,7 +150,7 @@ class ArticleCreateView(CreateView):
     model = Article
     form_class = ArticleModelForm
     success_url = reverse_lazy('blogapp:home')
-    template_name = 'article_create.html'
+    template_name = 'blogapp/article_create.html'
 
     def get(self, request, *args, **kwargs):
         """
@@ -169,7 +194,8 @@ class ArticleCreateView(CreateView):
         self.object.author = self.request.user
         self.object = form.save()
         for i in img_inline:
-            i.save()
+            if i.cleaned_data:
+                i.save()
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form, img_inline):
@@ -207,7 +233,7 @@ class ImgCreateView(CreateView):
     model = Image
     form_class = ImgModelForm
     success_url = reverse_lazy('blogapp:home')
-    template_name = 'img_create.html'
+    template_name = 'blogapp/img_create.html'
 
 
 class ArticleUpdateView(UpdateView):
@@ -217,7 +243,7 @@ class ArticleUpdateView(UpdateView):
     model = Article
     form_class = ArticleModelForm
     success_url = reverse_lazy('blogapp:home')
-    template_name = 'article_update.html'
+    template_name = 'blogapp/article_update.html'
 
 
 class ArticleDeleteView(DeleteView):
@@ -226,4 +252,4 @@ class ArticleDeleteView(DeleteView):
     """
     model = Article
     success_url = reverse_lazy('blogapp:home')
-    template_name = 'article_delete.html'
+    template_name = 'blogapp/article_delete.html'

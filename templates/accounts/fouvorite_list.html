@@ -1,0 +1,10 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+{% for post in new %}
+<div><a href="{{post.get_absolute_url}}">{{post.name}}</a></div>
+
+{%endfor%}
+
+{% endblock %}

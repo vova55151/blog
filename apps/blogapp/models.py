@@ -53,6 +53,7 @@ class Article(models.Model):
                                null=True, blank=True)
     category = models.ForeignKey(to=Category, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Категория'),
                                  null=True)
+    preview = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Превью'), default=None)
     subcategory = models.ForeignKey(to=Subcategory, on_delete=models.SET_NULL,
                                     verbose_name=ugettext_lazy('Подкатегория'),
                                     null=True)
@@ -64,7 +65,7 @@ class Article(models.Model):
     ]
     rec = models.CharField(choices=recl, max_length=255,
                            verbose_name=ugettext_lazy('Рекомендуемые статьи'))  # TODO :нету
-
+    favourites = models.ManyToManyField(to=get_user_model(), related_name='favourites', default=None, blank=True)
     rating = models.CharField(max_length=255, verbose_name=ugettext_lazy('Средний рейтинг'))
     comments_count = models.CharField(max_length=255, verbose_name=ugettext_lazy('Количество отзывов'))
     likes_count = models.CharField(max_length=255, verbose_name=ugettext_lazy('Количество лайков'))
@@ -94,10 +95,10 @@ class Article(models.Model):
 
 
 class Image(models.Model):
-    img = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Фото профиля'))
+    img = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Дополнительные фото'), default=None)
     alt = models.CharField(max_length=255, verbose_name=ugettext_lazy('Краткое описание'))
     article = models.ForeignKey(to=Article, verbose_name=ugettext_lazy('Статья'), on_delete=models.SET_NULL,
-                                null=True, related_name='images')
+                                null=True)
 
 
 class Comment(models.Model):
@@ -106,14 +107,20 @@ class Comment(models.Model):
     article = models.ForeignKey(to=Article, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Статья'),
                                 null=True)
 
-    ratingd = (
-        ('1', 1),
-        ('2', 2),
-        ('3', 3),
-        ('4', 4),
-        ('5', 5),
+    statusl = (
+        ('D', 'Draft'),
+        ('P', 'Published'),
+
     )
-    rating = models.IntegerField(choices=ratingd, verbose_name=ugettext_lazy('Рейтинг'))
+    status = models.CharField(choices=statusl, max_length=100, verbose_name=ugettext_lazy('Статус'))
+    ratingl = (
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
+    )
+    rating = models.CharField(choices=ratingl, max_length=100, verbose_name=ugettext_lazy('Рейтинг'))
     text = RichTextField(verbose_name=ugettext_lazy('Контент'))
     date_created = models.DateTimeField(auto_now_add=True)
     date_edit = models.DateTimeField(auto_now=True)

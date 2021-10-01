@@ -29,3 +29,10 @@ class User(AbstractUser):
         Возвращает email юзера
         """
         return self.email
+
+    @property
+    def get_photo_url(self):
+        if self.img and hasattr(self.img, 'url'):
+            return self.img.url
+        else:
+            return "/media/user.png"
