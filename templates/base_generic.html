@@ -27,8 +27,9 @@
             {% get_available_languages as LANGUAGES %}
             {% get_language_info_list for LANGUAGES as languages %}
             {% for language in languages %}
-            <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}
-                    selected{% endif %}>
+            <option value="{{ language.code }}"
+                    {%if language.code == LANGUAGE_CODE %}
+                    selected {%endif%}>
                 {{ language.name_local }} ({{ language.code }})
             </option>
             {% endfor %}
@@ -60,7 +61,7 @@
 
             {% for menu in header %}
             <li class="nav-item">
-                <a class="nav-link" href="{{ menu.url }}" target="{{ menu.target }}">{{ menu.name }}</a>
+                <a class="nav-link" href="{{ menu.url }}" target="{{ menu.target }}">{{ menu.name }}</a>#
             </li>
             {% endfor %}
 
@@ -72,12 +73,13 @@
             ">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Добавить
+                    Аккаунт
                 </a>
 
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="{% url 'blogapp:create'%}">Новый blogapp</a>
-                    <a class="dropdown-item" href="{% url 'blogapp:create'%}">Новый blogapp</a>
+                    <a class="dropdown-item" href="{% url 'accounts:pofile' user.pk%}">Личный кабинет</a>
+                    <a class="dropdown-item" href="{% url 'accounts:pofile_delete' user.pk%}">Удалить профиль</a>
+                    <a class="dropdown-item" href="{% url 'accounts:pofile_update' user.pk%}">Редактировать профиль</a>
                 </div>
 
             </li>

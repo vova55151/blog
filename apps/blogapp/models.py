@@ -1,3 +1,5 @@
+import statistics
+
 from ckeditor.fields import RichTextField
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -76,7 +78,7 @@ class Article(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        # TODO : перенести kod в default, auto_created?
+
         if not self.slug:
             self.slug = from_cyrillic_to_eng(str(self.name))
             if Article.objects.filter(slug=self.slug).count() > 0:
@@ -84,7 +86,7 @@ class Article(models.Model):
 
         # self.comments_count = self.comment_set.all().count()# v comment
         # self.likes_count = self.like_set.all().count()# v like
-        # self.rating_average = self.comment_set.aggregate()#TODO : вытянуть рейтинг в комментарий через сигнал
+        # self.rating_average = self.comment_set.aggregate()
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -125,12 +127,24 @@ class Comment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_edit = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
 
-class Like(models.Model):
-    author = models.ForeignKey(to=get_user_model(), verbose_name=ugettext_lazy('Автор'), on_delete=models.SET_NULL,
-                               null=True)
-    article = models.ForeignKey(to=Article, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Статья'),
-                                null=True)
+        model_class = self._meta.model
+        # if model_class.objects.filter(author=self.author, article=self.article).exists(): #TODO : проверка не работает
+        #     print(model_class.objects.filter(author=self.author, article=self.article).exists())
+        object_list = model_class.objects.filter(article=self.article)  # .exclude(author=self.author)
+        print(model_class.objects.filter(author=self.author, article=self.article).exists())
+        if object_list:
+            self.article.rating = statistics.mean([int(i.rating) for i in object_list])
+            self.article.save()
+        super().save()
+
+#
+# class Like(models.Model):
+#     author = models.ForeignKey(to=get_user_model(), verbose_name=ugettext_lazy('Автор'), on_delete=models.SET_NULL,
+#                                null=True)
+#     article = models.ForeignKey(to=Article, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Статья'),
+#                                 null=True)
 
 
 class TextPage(models.Model):

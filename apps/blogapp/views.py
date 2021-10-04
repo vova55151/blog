@@ -57,7 +57,8 @@ class ArticleDetailView(DetailView, CreateView):
 
     model = Article
     template_name = 'blogapp/article_detail.html'
-    # success_url = reverse_lazy('blogapp:home')  # TODO : сделать через 2 вьюхи ,передавая одну в шаблоне формы в action
+    # success_url = reverse_lazy('blogapp:home')  # TODO : сделать через 2 вьюхи ,передавая одну в шаблоне формы в
+    #  action
     form_class = CommentModelForm
 
     def form_valid(self, form):

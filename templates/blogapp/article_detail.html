@@ -33,7 +33,7 @@
 
 
 
-<a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary">Favorites</a>
+<a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary">В избранное</a>
 <br>
 <br>
 
@@ -48,7 +48,11 @@
    {% for c in comments %}
 
         <div> <p class="card-text">{{c.text|striptags|safe }}</p>
-          <p>{{c.author}}</p></div>
+          <p><a href="{{ c.author.get_absolute_url }}">{{ c.author }}</a></p>
+            <p>{{c.date_created}}</p>
+            <p>{{c.rating}}</p>
+
+        </div>
         <br>
 
       {% endfor %}

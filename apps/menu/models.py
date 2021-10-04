@@ -8,8 +8,8 @@ class Menu(models.Model):
     url = models.CharField(max_length=200, verbose_name='URL')
     targets = [
 
-        ('B', '_blank'),
-        ('S', '_self')
+        ('_blank', '_blank'),
+        ('_self', '_self')
     ]
     target = models.CharField(choices=targets, max_length=20, verbose_name='Target',
                               default="_self")

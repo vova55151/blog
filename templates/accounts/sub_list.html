@@ -1,0 +1,10 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+{% for u in new %}
+<div><a href="{{u.get_absolute_url}}">{{u.name}}</a></div>
+
+{%endfor%}
+
+{% endblock %}
