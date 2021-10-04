@@ -122,7 +122,8 @@ class Comment(models.Model):
         ('4', '4'),
         ('5', '5'),
     )
-    rating = models.CharField(choices=ratingl, max_length=100, verbose_name=ugettext_lazy('Рейтинг'))
+    rating = models.CharField(choices=ratingl, max_length=100, verbose_name=ugettext_lazy('Рейтинг'), null=True,
+                              blank=True)
     text = RichTextField(verbose_name=ugettext_lazy('Контент'))
     date_created = models.DateTimeField(auto_now_add=True)
     date_edit = models.DateTimeField(auto_now=True)
@@ -130,14 +131,22 @@ class Comment(models.Model):
     def save(self, *args, **kwargs):
 
         model_class = self._meta.model
-        # if model_class.objects.filter(author=self.author, article=self.article).exists(): #TODO : проверка не работает
+        # if model_class.objects.filter(author=self.author, article=self.article).exists(): #TODO : СИГНАЛЫ
         #     print(model_class.objects.filter(author=self.author, article=self.article).exists())
-        object_list = model_class.objects.filter(article=self.article)  # .exclude(author=self.author)
-        print(model_class.objects.filter(author=self.author, article=self.article).exists())
-        if object_list:
-            self.article.rating = statistics.mean([int(i.rating) for i in object_list])
-            self.article.save()
+        # print(model_class.objects.filter(author=self.author, article=self.article, status="P").exists())
+        # art = self.article
+        # if not model_class.objects.filter(author=self.author, article=self.article, status="P").exists():
+        #     if object_list:
+        #         art.rating = statistics.mean([int(i.rating) for i in object_list])
+        #
+        #         art.save()
+        # else:
+        #     self.rating = None
+        object_list = model_class.objects.filter(article=self.article, status="P")  # .exclude(author=self.author)
+        self.article.rating = statistics.mean([int(i.rating) for i in object_list])
+        self.article.save()
         super().save()
+
 
 #
 # class Like(models.Model):

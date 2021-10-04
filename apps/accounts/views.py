@@ -85,7 +85,7 @@ def subscribers_list(request):
     return render(request, 'accounts/sub_list.html', {'new': new})
 
 
-# TODO : доделать
+
 @login_required
 def subscribers_add(request, pk):
     subscribers = get_object_or_404(get_user_model(), pk=pk)
