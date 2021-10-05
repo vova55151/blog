@@ -36,14 +36,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'treebeard',
     'rest_framework',
     'ckeditor',
+    'ckeditor_uploader',
     'apps.blogapp',
     'apps.menu',
     'apps.accounts',
     'django_filters',
 
 ]
+
+CKEDITOR_UPLOAD_PATH = 'media/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -71,6 +75,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.request',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',

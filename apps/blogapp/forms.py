@@ -13,7 +13,7 @@ class ArticleModelForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ['name', 'descr', 'category', 'subcategory', 'content', 'rec', 'slug', 'preview']
+        fields = ['name', 'descr', 'category', 'content', 'slug', 'preview']
 
         # def clean_cost(self):
     #     """

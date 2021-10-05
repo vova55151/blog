@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import ckeditor_uploader
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -24,14 +25,15 @@ from blg import settings
 
 # TODO : sudo apt-get install gettext
 urlpatterns = [
-
-    path('i18n/', include('django.conf.urls.i18n'))
+    path('ckeditor/', include('ckeditor_uploader.urls')),
+    path('i18n/', include('django.conf.urls.i18n')),
 ]
 urlpatterns += i18n_patterns(
 
     path('admin/', admin.site.urls),
     path('blog/', include('apps.blogapp.urls')),
     path('accounts/', include('apps.accounts.urls')),
+
 )
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

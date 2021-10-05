@@ -1,17 +1,19 @@
 import statistics
 
 from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy
+from treebeard.mp_tree import MP_Node
 
 from blg.utils import from_cyrillic_to_eng
 
 
-class Category(models.Model):
+class Category(MP_Node):  # todo: рутовая категория не выводит статьи к подкатегории
     name = models.CharField(max_length=100, verbose_name=ugettext_lazy('Название'))
     slug = models.SlugField(unique=True, verbose_name='Slug', null=True, blank=True)
 
@@ -23,20 +25,6 @@ class Category(models.Model):
             self.slug = from_cyrillic_to_eng(str(self.name))
 
         super().save(*args, **kwargs)
-
-
-# TODO : категория и подкатегория к статье many to many or fk
-
-class Subcategory(models.Model):
-    category = models.ForeignKey(to=Category, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Категория'),
-                                 null=True, blank=True)
-    name = models.CharField(max_length=100, verbose_name=ugettext_lazy('Название'))
-    slug = models.SlugField(unique=True, verbose_name='Slug', null=True, blank=True)
-    parents = [
-        ('H', 'Header'),
-        ('F', 'Footer')
-    ]
-    parent = models.CharField(choices=parents, max_length=20, verbose_name='Родитель')  # TODO : ?
 
     def __str__(self):
         return self.name
@@ -56,17 +44,8 @@ class Article(models.Model):
     category = models.ForeignKey(to=Category, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Категория'),
                                  null=True)
     preview = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Превью'), default=None)
-    subcategory = models.ForeignKey(to=Subcategory, on_delete=models.SET_NULL,
-                                    verbose_name=ugettext_lazy('Подкатегория'),
-                                    null=True)
     descr = models.CharField(max_length=255, verbose_name=ugettext_lazy('Краткое описание'))
-    content = RichTextField(verbose_name=ugettext_lazy('Контент'))
-    recl = [
-        ('H', 'Header'),
-        ('F', 'Footer'),
-    ]
-    rec = models.CharField(choices=recl, max_length=255,
-                           verbose_name=ugettext_lazy('Рекомендуемые статьи'))  # TODO :нету
+    content = RichTextUploadingField(verbose_name=ugettext_lazy('Контент'))
     favourites = models.ManyToManyField(to=get_user_model(), related_name='favourites', default=None, blank=True)
     rating = models.CharField(max_length=255, verbose_name=ugettext_lazy('Средний рейтинг'))
     comments_count = models.CharField(max_length=255, verbose_name=ugettext_lazy('Количество отзывов'))
@@ -129,7 +108,6 @@ class Comment(models.Model):
     date_edit = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-
         model_class = self._meta.model
         # if model_class.objects.filter(author=self.author, article=self.article).exists(): #TODO : СИГНАЛЫ
         #     print(model_class.objects.filter(author=self.author, article=self.article).exists())
@@ -143,8 +121,9 @@ class Comment(models.Model):
         # else:
         #     self.rating = None
         object_list = model_class.objects.filter(article=self.article, status="P")  # .exclude(author=self.author)
-        self.article.rating = statistics.mean([int(i.rating) for i in object_list])
-        self.article.save()
+        if object_list:
+            self.article.rating = statistics.mean([int(i.rating) for i in object_list])
+            self.article.save()
         super().save()
 
 

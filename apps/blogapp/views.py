@@ -25,7 +25,6 @@ class Filter(django_filters.FilterSet):
             ('rating', 'rating'),
             ('author', 'author'),
             ('category', 'category'),
-            ('subcategory', 'subcategory'),
             ('date_created', 'date_created'),
         ),
 
@@ -77,12 +76,13 @@ class ArticleDetailView(DetailView, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        comments = self.get_object().comment_set.all()
+        object = self.get_object()
+        comments = object.comment_set.all()
         if self.request.POST:
             comment_form = self.form_class(self.request.POST)
         else:
             comment_form = CommentModelForm()
-
+        context['recommended'] = Article.objects.filter(category=self.get_object().category).exclude(id=object.id)
         context['comment_form'] = comment_form
         context['comments'] = comments
 
