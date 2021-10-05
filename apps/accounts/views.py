@@ -76,7 +76,7 @@ class ProfileUpdate(UpdateView):
     form_class = UserModelForm
 
     def get_success_url(self):
-        return reverse_lazy('accounts:pofile', kwargs={'pk': self.get_object().pk})
+        return reverse_lazy('accounts:profile', kwargs={'pk': self.get_object().pk})
 
 
 @login_required
@@ -90,10 +90,5 @@ def subscribers_list(request):
 def subscribers_add(request, pk):
     subscribers = get_object_or_404(get_user_model(), pk=pk)
     subscribers.subscribers.add(request.user)
-    #User.
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
-    # if get_user_model().objects.filter(id=request.user.id).count() > 0:
-    #     subscribers.remove(request.user)
-    # else:
-    #     subscribers.add(request.user)
-    # return HttpResponseRedirect(request.META['HTTP_REFERER'])
+

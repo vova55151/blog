@@ -1,7 +1,15 @@
 {% extends "base_generic.html" %}
 {%load i18n%}
-{% block content %}
 
+
+{% block content %}
+{% load django_bootstrap_breadcrumbs %}
+{% block breadcrumbs %}
+    {% breadcrumb "Блог" "blogapp:home" %}
+    {% breadcrumb article.category article.category.get_absolute_url %}
+    {% breadcrumb "Статья" "blogapp:detail" article.slug %}
+{% endblock %}
+{% render_breadcrumbs %}
  {% if article.preview %}
 
 <img src="{{article.preview.url}}" width="500" height="400">
@@ -15,7 +23,7 @@
 <p class="card-text">{{article.content|safe }}</p>
   {% for img in article.image_set.all %}
 
-          <img src="{{img.img.url}}" alt="{{img.alt}}" width="50" height="40">
+          <img src="{{img.img.url}}" alt="{{img.alt}}" width="500" height="400">
 
       {% endfor %}
 
@@ -44,10 +52,10 @@
         <div><a href="{{ art.get_absolute_url }}">{{ art.name }}</a></div>
 
              {% if art.preview %}
-            <img src="{{art.preview.url}}" width="700" height="300">
+            <img src="{{art.preview.url}}" width="70" height="30">
             {%endif%}
 
-          <div><img src="{{ art.author.get_photo_url }}" width="70" height="30" class="img-responsive thumbnail " alt="img">
+          <div><img src="{{ art.author.get_photo_url }}" width="30" height="20" class="img-responsive thumbnail " alt="img">
                   <a href="{{ art.author.get_absolute_url }}">{{ art.author }}</a></div>
 
       </li>

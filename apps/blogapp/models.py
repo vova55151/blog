@@ -26,14 +26,11 @@ class Category(MP_Node):  # todo: рутовая категория не выв�
 
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = from_cyrillic_to_eng(str(self.name))
-
-        super().save(*args, **kwargs)
+    def get_absolute_url(self):
+        """
+        Возвращает юрл информации о компанни с определенным pk
+        """
+        return f"/blog/?author=&category={self.pk}&name=&o="
 
 
 class Article(models.Model):

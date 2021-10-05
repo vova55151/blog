@@ -1,7 +1,13 @@
 {% extends "base_generic.html" %}
 {%load i18n%}
-{% block content %}
 
+{% block content %}
+{% load django_bootstrap_breadcrumbs %}
+{% block breadcrumbs %}
+    {% breadcrumb "Блог" "blogapp:home" %}
+    {% breadcrumb "Личный кабинет" "accounts:profile" user.pk %}
+{% endblock %}
+{% render_breadcrumbs %}
 
 
 <img src="{{user.get_photo_url}}" width="500" height="400">

@@ -1,7 +1,12 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-
+{% load django_bootstrap_breadcrumbs %}
+{% block breadcrumbs %}
+    {% breadcrumb "Блог" "blogapp:home" %}
+    {% breadcrumb "Создание статьи" "blogapp:create" article.slug %}
+{% endblock %}
+{% render_breadcrumbs %}
 <form action="" enctype= multipart/form-data method="post">
     {% csrf_token %}
     <table>

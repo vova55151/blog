@@ -1,7 +1,12 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-
+{% load django_bootstrap_breadcrumbs %}
+{% block breadcrumbs %}
+    {% breadcrumb "Блог" "blogapp:home" %}
+    {% breadcrumb "Статья" "blogapp:update" article.slug %}
+{% endblock %}
+{% render_breadcrumbs %}
 <h1>Редактирование компании</h1>
 <form method="post" action="">
     {%  csrf_token %}

@@ -56,8 +56,7 @@ class ArticleDetailView(DetailView, CreateView):
 
     model = Article
     template_name = 'blogapp/article_detail.html'
-    # success_url = reverse_lazy('blogapp:home')  # TODO : сделать через 2 вьюхи ,передавая одну в шаблоне формы в
-    #  action
+    # TODO : сделать через 2 вьюхи ,передавая одну в шаблоне формы в action
     form_class = CommentModelForm
 
     def form_valid(self, form):
@@ -82,7 +81,7 @@ class ArticleDetailView(DetailView, CreateView):
             comment_form = self.form_class(self.request.POST)
         else:
             comment_form = CommentModelForm()
-        context['recommended'] = Article.objects.filter(category=self.get_object().category).exclude(id=object.id)
+        context['recommended'] = Article.objects.filter(category=object.category).exclude(id=object.id)
         context['comment_form'] = comment_form
         context['comments'] = comments
 

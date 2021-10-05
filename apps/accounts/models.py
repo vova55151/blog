@@ -43,4 +43,4 @@ class User(AbstractUser):
         """
         Возвращает юрл информации о компанни с определенным pk
         """
-        return reverse('accounts:pofile', args=[int(self.pk)])
+        return reverse('accounts:profile', args=[int(self.pk)])

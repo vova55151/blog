@@ -1,7 +1,11 @@
 {% extends "base_generic.html" %}
-
 {% block content %}
-
+{% load django_bootstrap_breadcrumbs %}
+{% block breadcrumbs %}
+    {% breadcrumb "Блог" "blogapp:home" %}
+    {% breadcrumb "Список избранного" "subscribers_list"%}
+{% endblock %}
+{% render_breadcrumbs %}
 {% for post in new %}
 <div><a href="{{post.get_absolute_url}}">{{post.name}}</a></div>
 

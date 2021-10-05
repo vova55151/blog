@@ -19,6 +19,7 @@
 {% headermenu request as header %}
 {% footerermenu request as footer %}
 {%load i18n%}
+
 <li>
     <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
         <input name="next" type="hidden" value="{{ redirect_to }}">
@@ -77,9 +78,9 @@
                 </a>
 
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="{% url 'accounts:pofile' user.pk%}">Личный кабинет</a>
-                    <a class="dropdown-item" href="{% url 'accounts:pofile_delete' user.pk%}">Удалить профиль</a>
-                    <a class="dropdown-item" href="{% url 'accounts:pofile_update' user.pk%}">Редактировать профиль</a>
+                    <a class="dropdown-item" href="{% url 'accounts:profile' user.pk%}">Личный кабинет</a>
+                    <a class="dropdown-item" href="{% url 'accounts:profile_delete' user.pk%}">Удалить профиль</a>
+                    <a class="dropdown-item" href="{% url 'accounts:profile_update' user.pk%}">Редактировать профиль</a>
                 </div>
 
             </li>
