@@ -19,7 +19,10 @@ class Category(MP_Node):  # todo: рутовая категория не выв�
     slug = models.SlugField(unique=True, verbose_name='Slug', null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        if self.depth == 1:
+            return self.name
+        if self.depth == 2:
+            return f"-{self.name}"
 
     def save(self, *args, **kwargs):
         if not self.slug:

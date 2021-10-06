@@ -18,6 +18,22 @@ class Filter(django_filters.FilterSet):
     """
     Класс для корректной работы фильтра по ключевым словам
     """
+
+    def filter_by_category(queryset=None, name=None, value=None):
+        category = value
+
+        if category.depth == 1:
+            queryset = queryset.filter(category__in=category.get_children())
+        else:
+            queryset = queryset.filter(category=category)
+
+        return queryset
+
+    category = django_filters.ModelChoiceFilter(
+        queryset=Category.objects.all(),
+        method=filter_by_category
+    )
+
     name = django_filters.CharFilter(lookup_expr='icontains')
     o = OrderingFilter(
         # tuple-mapping retains order
