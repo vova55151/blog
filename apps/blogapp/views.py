@@ -76,11 +76,19 @@ class ArticleDetailView(DetailView, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         object = self.get_object()
-        comments = object.comment_set.all()
+        comments = object.comment_set.filter(status="P")
         if self.request.POST:
             comment_form = self.form_class(self.request.POST)
         else:
             comment_form = CommentModelForm()
+        if get_user_model().objects.filter(subscribers=self.request.user).exists():
+            context["Sub"] = True
+        else:
+            context["Sub"] = False
+        if Article.objects.filter(favourites=self.request.user).exists():
+            context["Fav"] = True
+        else:
+            context["Fav"] = False
         context['recommended'] = Article.objects.filter(category=object.category).exclude(id=object.id)
         context['comment_form'] = comment_form
         context['comments'] = comments

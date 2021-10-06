@@ -7,7 +7,24 @@
 {% endblock %}
 {% render_breadcrumbs %}
 {% for post in new %}
-<div><a href="{{post.get_absolute_url}}">{{post.name}}</a></div>
+
+
+      <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
+
+        <div><a style="padding: 75px;" href="{{ post.get_absolute_url }}">{{ post.name }}</a></div>
+
+             {% if post.preview %}
+            <img src="{{post.preview.url}}" style="margin: 0 auto;display: block;max-width: 80%;">
+            {%endif%}
+
+          <div><img src="{{ post.author.get_photo_url }}" style="margin: 5px 72px;display: block;max-width: 10%;" class="img-responsive thumbnail " alt="img">
+                  <a style="padding: 75px;" href="{{ post.author.get_absolute_url }}">{{ post.author }}</a></div>
+
+      </li>
+
+
+
+
 
 {%endfor%}
 

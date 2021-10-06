@@ -18,5 +18,10 @@
 <p>{{user.last_name}}</p>
 <p>{{user.email}}</p>
 <p>{{user.phone}}</p>
+<p>{{user_subs}}</p>
+ {% if Sub == True %}
+<a href="{% url 'accounts:subscribers_add' user.pk %}" class="btn btn-outline-primary">Отписаться</a>
+{%else%}
 <a href="{% url 'accounts:subscribers_add' user.pk %}" class="btn btn-outline-primary">Подписаться</a>
+{%endif%}
 {%endblock%}

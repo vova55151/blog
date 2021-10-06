@@ -13,7 +13,7 @@ class ArticleModelForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ['name', 'descr', 'category', 'content', 'slug', 'preview']
+        fields = ['name', 'descr', 'category', 'content', 'slug', 'preview', 'comments_count', 'likes_count']
 
         # def clean_cost(self):
     #     """
@@ -35,7 +35,7 @@ class CommentModelForm(forms.ModelForm):
 
     class Meta:
         model = Comment
-        fields = ['text',"status",'rating']
+        fields = ['text', "status", 'rating']
 
 
 class ImgModelForm(forms.ModelForm):
@@ -52,4 +52,4 @@ Img_inline = inlineformset_factory(Article,
                                    Image,
                                    fields=['img', 'alt', 'article'],
                                    form=ImgModelForm,
-                                   extra=2,)
+                                   extra=2, )

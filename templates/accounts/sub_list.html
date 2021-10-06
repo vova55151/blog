@@ -7,8 +7,18 @@
     {% breadcrumb "Список подписок" "blogapp:create" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
-{% for u in new %}
-<div><a href="{{u.get_absolute_url}}">{{u.email}}</a></div>
+{% for usr in new %}
+      <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
+
+
+
+
+
+          <div><img src="{{ usr.get_photo_url }}" style="margin: 5px 72px;display: block;max-width: 10%;" class="img-responsive thumbnail " alt="img">
+                  <a style="padding: 75px;" href="{{ usr.get_absolute_url }}">{{ usr.email }}</a></div>
+
+      </li>
+
 
 {%endfor%}
 

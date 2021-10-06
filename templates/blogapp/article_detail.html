@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 {%load i18n%}
-
+{% block title %}<title>Статья</title>{% endblock %}
 
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
@@ -40,14 +40,23 @@
 
 
 
-
+{% if Fav == True %}
+<a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary">Удалить из избранного</a>
+{%else%}
 <a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary">В избранное</a>
-<a href="{% url 'accounts:subscribers_add' article.author.pk %}" class="btn btn-outline-primary">Подписаться на автора</a>
+{%endif%}
+
+{% if Sub == True %}
+<a href="{% url 'accounts:subscribers_add' user.pk %}" class="btn btn-outline-primary">Отписаться</a>
+{%else%}
+<a href="{% url 'accounts:subscribers_add' user.pk %}" class="btn btn-outline-primary">Подписаться</a>
+{%endif%}
 <br>
 <br>
 {% for art in recommended %}
 
-       <li>
+       <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
+
 
         <div><a href="{{ art.get_absolute_url }}">{{ art.name }}</a></div>
 
@@ -73,6 +82,7 @@
 </form>
 {{comments.count}}
    {% for c in comments %}
+<li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 
         <div> <p class="card-text">{{c.text|striptags|safe }}</p>
           <p><a href="{{ c.author.get_absolute_url }}">{{ c.author }}</a></p>
@@ -80,7 +90,7 @@
             <p>{{c.rating}}</p>
 
         </div>
-        <br>
+       </li>
 
       {% endfor %}
 

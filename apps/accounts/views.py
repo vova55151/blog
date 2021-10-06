@@ -2,8 +2,6 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
-
-# Create your views here.
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, DeleteView, UpdateView
 
@@ -22,8 +20,11 @@ def favourite_add(request, slug):
     post = get_object_or_404(Article, slug=slug)
     if post.favourites.filter(id=request.user.id).count() > 0:
         post.favourites.remove(request.user)
+        post.likes_count -= 1
     else:
+        post.likes_count += 1
         post.favourites.add(request.user)
+    post.save()
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
@@ -63,6 +64,14 @@ class ProfileDetail(DetailView):
     model = get_user_model()
     template_name = 'accounts/profile_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if get_user_model().objects.filter(subscribers=self.request.user).exists():
+            context["Sub"] = True
+        else:
+            context["Sub"] = False
+        return context
+
 
 class ProfileDelete(DeleteView):
     model = get_user_model()
@@ -85,10 +94,24 @@ def subscribers_list(request):
     return render(request, 'accounts/sub_list.html', {'new': new})
 
 
-
 @login_required
 def subscribers_add(request, pk):
-    subscribers = get_object_or_404(get_user_model(), pk=pk)
-    subscribers.subscribers.add(request.user)
+    user = get_object_or_404(get_user_model(), pk=pk)
+    if user.subscribers.filter(id=request.user.id).count() > 0:
+        user.subscribers.remove(request.user)
+    else:
+        user.subscribers.add(request.user)
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
+
+@login_required
+def favourite_add(request, slug):
+    post = get_object_or_404(Article, slug=slug)
+    if post.favourites.filter(id=request.user.id).count() > 0:
+        post.favourites.remove(request.user)
+        post.likes_count -= 1
+    else:
+        post.likes_count += 1
+        post.favourites.add(request.user)
+    post.save()
+    return HttpResponseRedirect(request.META['HTTP_REFERER'])

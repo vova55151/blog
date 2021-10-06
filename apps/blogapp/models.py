@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Avg, Count
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy
 from treebeard.mp_tree import MP_Node
@@ -45,8 +46,8 @@ class Article(models.Model):
     content = RichTextUploadingField(verbose_name=ugettext_lazy('Контент'))
     favourites = models.ManyToManyField(to=get_user_model(), related_name='favourites', default=None, blank=True)
     rating = models.CharField(max_length=255, verbose_name=ugettext_lazy('Средний рейтинг'))
-    comments_count = models.CharField(max_length=255, verbose_name=ugettext_lazy('Количество отзывов'))
-    likes_count = models.CharField(max_length=255, verbose_name=ugettext_lazy('Количество лайков'))
+    comments_count = models.IntegerField(default=0, verbose_name=ugettext_lazy('Количество отзывов'))
+    likes_count = models.IntegerField(default=0, verbose_name=ugettext_lazy('Количество лайков'))
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=ugettext_lazy('Дата создания'))
     date_edit = models.DateTimeField(auto_now=True, verbose_name=ugettext_lazy('Дата обновления'))
 
@@ -109,19 +110,20 @@ class Comment(models.Model):
         # if model_class.objects.filter(author=self.author, article=self.article).exists(): #TODO : СИГНАЛЫ
         #     print(model_class.objects.filter(author=self.author, article=self.article).exists())
         # print(model_class.objects.filter(author=self.author, article=self.article, status="P").exists())
-        # art = self.article
-        # if not model_class.objects.filter(author=self.author, article=self.article, status="P").exists():
-        #     if object_list:
-        #         art.rating = statistics.mean([int(i.rating) for i in object_list])
-        #
-        #         art.save()
-        # else:
-        #     self.rating = None
+
+        #     .annotate(Count('rating'))
+        # self.objects.article.comments_count = count.comment_rating__count
+
         object_list = model_class.objects.filter(article=self.article, status="P")  # .exclude(author=self.author)
         if object_list:
-            self.article.rating = statistics.mean([int(i.rating) for i in object_list])
+
+            self.article.rating = Comment.objects.all().filter(article=self.article, status="P").aggregate(Avg('rating')).get('rating__avg')
+            self.article.comments_count = Comment.objects.all().filter(article=self.article, status="P").count()
+
+            # self.article.rating = statistics.mean([int(i.rating) for i in object_list])
+            # self.article.comments_count += 0.5  # TODO: 1ый сейв commit = False
             self.article.save()
-        super().save()
+        super().save()  # TODO: @#!#@!@$@@$!#$SA
 
 
 #
