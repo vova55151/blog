@@ -14,7 +14,7 @@ from treebeard.mp_tree import MP_Node
 from blg.utils import from_cyrillic_to_eng
 
 
-class Category(MP_Node):  # todo: рутовая категория не выводит статьи к подкатегории
+class Category(MP_Node):
     name = models.CharField(max_length=100, verbose_name=ugettext_lazy('Название'))
     slug = models.SlugField(unique=True, verbose_name='Slug', null=True, blank=True)
 
@@ -23,6 +23,8 @@ class Category(MP_Node):  # todo: рутовая категория не выв�
             return self.name
         if self.depth == 2:
             return f"-{self.name}"
+        else:
+            return f"--{self.name}"
 
     def save(self, *args, **kwargs):
         if not self.slug:

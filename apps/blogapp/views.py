@@ -2,6 +2,8 @@
 import statistics
 
 import django_filters
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.views import PasswordChangeView
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
@@ -10,6 +12,7 @@ from django.views.generic.list import MultipleObjectMixin
 from django_filters import OrderingFilter
 from django_filters.views import FilterView
 
+from apps.accounts.forms import UserModelForm
 from apps.blogapp.forms import *
 from apps.blogapp.models import *
 
@@ -19,14 +22,14 @@ class Filter(django_filters.FilterSet):
     Класс для корректной работы фильтра по ключевым словам
     """
 
-    def filter_by_category(queryset=None, name=None, value=None):
+    def filter_by_category(self, queryset=None, value=None):
         category = value
-
-        if category.depth == 1:
-            queryset = queryset.filter(category__in=category.get_children())
+        if category.get_descendants():
+            queryset1 = self.filter(category__in=category.get_descendants())
+            queryset2 = self.filter(category__exact=category)
+            queryset = queryset1 | queryset2
         else:
-            queryset = queryset.filter(category=category)
-
+            queryset = self.filter(category=category)
         return queryset
 
     category = django_filters.ModelChoiceFilter(
@@ -40,6 +43,45 @@ class Filter(django_filters.FilterSet):
         fields=(
             ('rating', 'rating'),
             ('author', 'author'),
+            ('category', 'category'),
+            ('date_created', 'date_created'),
+        ),
+
+        # labels do not need to retain order
+        # field_labels={
+        #
+        # }
+    )
+
+    class Meta:
+        model = Article
+        fields = ['author', 'category']
+
+
+class FilterUser(django_filters.FilterSet):
+    """
+    Класс для корректной работы фильтра по ключевым словам
+    """
+
+    def filter_by_category(self, queryset=None, value=None):
+        category = value
+        if category.get_descendants():
+            queryset1 = self.filter(category__in=category.get_descendants())
+            queryset2 = self.filter(category__exact=category)
+            queryset = queryset1 | queryset2
+        else:
+            queryset = self.filter(category=category)
+        return queryset
+
+    category = django_filters.ModelChoiceFilter(
+        queryset=Category.objects.all(),
+        method=filter_by_category
+    )
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('rating', 'rating'),
             ('category', 'category'),
             ('date_created', 'date_created'),
         ),
@@ -97,15 +139,16 @@ class ArticleDetailView(DetailView, CreateView):
             comment_form = self.form_class(self.request.POST)
         else:
             comment_form = CommentModelForm()
-        if get_user_model().objects.filter(subscribers=self.request.user).exists():
-            context["Sub"] = True
-        else:
-            context["Sub"] = False
-        if Article.objects.filter(favourites=self.request.user).exists():
-            context["Fav"] = True
-        else:
-            context["Fav"] = False
-        context['recommended'] = Article.objects.filter(category=object.category).exclude(id=object.id)
+        if self.request.user.is_authenticated:
+            if get_user_model().objects.filter(subscribers=self.request.user).exists():
+                context["Sub"] = True
+            else:
+                context["Sub"] = False
+            if Article.objects.filter(favourites=self.request.user).exists():
+                context["Fav"] = True
+            else:
+                context["Fav"] = False
+        context['recommended'] = Article.objects.filter(category=object.category).exclude(id=object.id)[0:5]
         context['comment_form'] = comment_form
         context['comments'] = comments
 
@@ -268,6 +311,43 @@ class ArticleUpdateView(UpdateView):
     form_class = ArticleModelForm
     success_url = reverse_lazy('blogapp:home')
     template_name = 'blogapp/article_update.html'
+
+
+class UserArticleList(FilterView, PasswordChangeView):
+    filterset_class = FilterUser
+    model = Article
+    paginate_by = 10
+    template_name = 'blogapp/article_user_list.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data()
+
+        context['pass_change'] = PasswordChangeForm(self.request.user)
+        context['user_form'] = UserModelForm(instance=self.request.user)
+
+        return context
+
+    def get_queryset(self):
+        return Article.objects.filter(author=self.request.user)
+
+
+class PasswordView(PasswordChangeView):
+    form_class = PasswordChangeForm
+    success_url = reverse_lazy('accounts:profile')
+    template_name = 'blogapp/article_user_list.html'
+
+
+class UserUpdateView(UpdateView):
+    """
+    Класс для редактирования проекта
+    """
+    model = get_user_model()
+    form_class = UserModelForm
+    success_url = reverse_lazy('accounts:profile')
+    template_name = 'blogapp/article_update.html'
+
+    def get_object(self):
+        return self.request.user
 
 
 class ArticleDeleteView(DeleteView):

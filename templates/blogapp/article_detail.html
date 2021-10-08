@@ -39,17 +39,21 @@
 
 
 
+{% if user.is_authenticated %}
+    {% if Fav == True %}
 
-{% if Fav == True %}
-<a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary">Удалить из избранного</a>
-{%else%}
-<a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary">В избранное</a>
-{%endif%}
+    <a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary"><i class="bi bi-heart"></i> Удалить из избранного</a>
 
-{% if Sub == True %}
-<a href="{% url 'accounts:subscribers_add' user.pk %}" class="btn btn-outline-primary">Отписаться</a>
-{%else%}
-<a href="{% url 'accounts:subscribers_add' user.pk %}" class="btn btn-outline-primary">Подписаться</a>
+    {%else%}
+    <a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i> В избранное</a>
+    {%endif%}
+
+    {% if Sub == True %}
+    <a href="{% url 'accounts:subscribers_add' article.author.pk %}" class="btn btn-outline-primary">Отписаться</a>
+    {%else%}
+
+    <a href="{% url 'accounts:subscribers_add' article.author.pk %}" class="btn btn-outline-primary">Подписаться</a>
+    {%endif%}
 {%endif%}
 <br>
 <br>

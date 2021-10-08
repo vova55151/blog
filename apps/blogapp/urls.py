@@ -9,4 +9,5 @@ urlpatterns = [
     path('update/<str:slug>/', ArticleUpdateView.as_view(), name='update'),
     path('detail/<str:slug>/', ArticleDetailView.as_view(), name='detail'),
     path('delete/<str:slug>/', ArticleDeleteView.as_view(), name='delete'),
+    path('articles/', UserArticleList.as_view(), name='list'),
 ]

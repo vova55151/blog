@@ -18,7 +18,7 @@ from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-
+import django_registration.backends.activation.urls
 from blg import settings
 
 # TODO: локализация python manage.py makemessages -l 'ru' , python manage.py compilemessages
@@ -33,7 +33,8 @@ urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('blog/', include('apps.blogapp.urls')),
     path('accounts/', include('apps.accounts.urls')),
-
+    # path('accounts/', include('django_registration.backends.activation.urls')),
+    # path('accounts/', include('django.contrib.auth.urls'))
 )
 if settings.DEBUG:
     import debug_toolbar

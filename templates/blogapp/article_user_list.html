@@ -1,0 +1,59 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Список постов</title>{% endblock %}
+
+{% block content %}
+{% load django_bootstrap_breadcrumbs %}
+{% block breadcrumbs %}
+    {% breadcrumb "Блог" "blogapp:home" %}
+    {% breadcrumb "Личный кабинет" "accounts:profile" user.pk %}
+{% endblock %}
+{% render_breadcrumbs %}
+
+<form action= "{% url 'accounts:profile-update' %}" enctype= multipart/form-data method="POST">
+    {% csrf_token %}
+        {{ user_form.as_p }}
+        <img src="{{ user.get_photo_url }}" height="150" alt="">
+        <input type="submit" value="Ok"/>
+     </form>
+<form action= "" method="POST">
+    {% csrf_token %}
+        {{ pass_change.as_p }}
+
+        <input type="submit" value="Ok"/>
+     </form>
+<form method="get">
+    {% csrf_token %}
+    {{ filter.form.as_p }}
+
+    <input type="submit" value="Поиск"/>
+ </form>
+    <h1 style="padding: 10px 507px;">Список постов</h1>
+    <a href="{% url 'blogapp:create'%}" class="btn btn-outline-primary">Создать статью</a>
+    {% if article_list %}
+    <ul>
+
+
+      {% for art in article_list %}
+      <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
+
+        <div ><a  href="{{ art.get_absolute_url }}">{{ art.name }}</a></div>
+
+        <div><a  href="{% url 'blogapp:update' art.slug%} ">Изменить</a>
+            <a  href="{% url 'blogapp:delete' art.slug%} ">Удалить</a></div>
+
+        </div>
+
+             {% if art.preview %}
+            <img src="{{art.preview.url}}" style="margin: 0 auto;display: block;max-width: 80%;">
+            {%endif%}
+
+
+
+      </li>
+      {% endfor %}
+
+
+    {% else %}
+      <p>Список постов пуст</p>
+    {% endif %}</ul>
+{% endblock %}

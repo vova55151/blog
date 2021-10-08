@@ -5,51 +5,21 @@
 <div class="container">
 
     <nav class="navbar fixed-bottom navbar-expand-lg navbar-light container" style="background-color: #e3f2fd;">
-        <a class="navbar-brand" href="{% url 'blogapp:home'%}">Blog</a>
+
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item {% if request.path == blogapp_home_url%}active {% endif %}	">
-                    <a class="nav-link" href="{% url 'blogapp:home'%}">Блог </a>
-                </li>
-                <li class="nav-item {% if request.path == trains_home_url%}active {% endif %}">
-                    <a class="nav-link" href="{% url 'blogapp:create'%}">Создать статью</a>
-                </li>
-                <li class="nav-item
-           {% if request.path == route_list%} active {% endif %}">
-                    <a class="nav-link" href="{% url 'blogapp:home'%}">Список статей</a>
-                </li>
                 <li>
                     {% for menu in footer %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ menu.url }}" target="{{ menu.target }}">{{ menu.name }}</a>
                 </li>
                 {% endfor %}
-                {% if user.is_authenticated%}
-                <li class="nav-item dropdown
-             {% if request.path == blogapp_create_url%}
-              active
-             {% endif %}
-            ">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Добавить
-                    </a>
 
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="{% url 'blogapp:create'%}">Новый blogapp</a>
-                        <a class="dropdown-item" href="{% url 'blogapp:create'%}">Новый blogapp</a>
-                    </div>
 
-                </li>
-                {% else %}
-                <li class="nav-item ">
-                    <a class="nav-link disabled" href="">Добавить</a>
-                </li>
-                {% endif %}
                 {% if user.is_authenticated%}
                 <li class="nav-item ">
                     <a class="nav-link" href="{% url 'accounts:logout'%}">Выйти</a>

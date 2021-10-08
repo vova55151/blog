@@ -1,0 +1,23 @@
+{% extends 'base_generic.html' %}
+
+
+{% block content %}
+<h1>Форма регистрации</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form action="{{action}}" method="post"> {% csrf_token %}
+            {{ form.as_p }}
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input"
+                onclick="if (password.type == 'text') (password.type = 'password')
+                if (password2.type == 'text') (password2.type = 'password')
+                ;else (password.type = 'text') (password2.type = 'text')">
+                <label class="form-check-label">Показать пароль</label>
+            </div>
+
+        <button type="submit" class="btn btn-primary"> Регистрация</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

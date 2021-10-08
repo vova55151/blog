@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
+from django_registration.forms import RegistrationForm
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -50,7 +51,7 @@ class UserLoginForm(forms.Form):
         return super().clean(*args, **kwargs)
 
 
-class UserRegistrationForm(forms.ModelForm):
+class UserRegistrationForm(forms.Form):
     email = forms.CharField(label='email', widget=forms.TextInput(attrs={
         'class': 'form-control',
         'placeholder': 'Введите email'
@@ -84,4 +85,4 @@ class UserModelForm(forms.ModelForm):
 
     class Meta:
         model = get_user_model()
-        fields = ['first_name', 'last_name', 'email', 'phone', 'img', 'subscribers']
+        fields = ['first_name', 'last_name', 'phone', 'img']

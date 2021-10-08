@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -43,4 +44,8 @@ class User(AbstractUser):
         """
         Возвращает юрл информации о компанни с определенным pk
         """
-        return reverse('accounts:profile', args=[int(self.pk)])
+        return reverse('accounts:profile')
+
+
+def get_email_field_name():
+    return get_user_model().email
