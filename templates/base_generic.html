@@ -99,7 +99,7 @@
                 <a class="nav-link" href="{% url 'accounts:login'%}?next={{request.get_full_path}}">Войти</a>
             </li>
             <li class="nav-item ">
-                <a class="nav-link" href="{% url 'accounts:register'%}?next={{request.get_full_path}}">Регистрация</a>
+                <a class="nav-link" href="{% url 'django_registration_register'%}?next={{request.get_full_path}}">Регистрация</a>
             </li>
             {% endif %}
 
@@ -152,7 +152,7 @@
 
 
     </script>
-    <div class="container">
+    <div class="container" style="padding-bottom:100px;">
         {% block content %}{% endblock %}
 
         {%include 'pagination.html'%}

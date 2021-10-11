@@ -3,7 +3,10 @@ import statistics
 
 import django_filters
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
+from django.contrib import messages
+from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
@@ -139,12 +142,13 @@ class ArticleDetailView(DetailView, CreateView):
             comment_form = self.form_class(self.request.POST)
         else:
             comment_form = CommentModelForm()
+        # post.favourites.filter(id=request.user.id).exists():
         if self.request.user.is_authenticated:
             if get_user_model().objects.filter(subscribers=self.request.user).exists():
                 context["Sub"] = True
             else:
                 context["Sub"] = False
-            if Article.objects.filter(favourites=self.request.user).exists():
+            if self.get_object().favourites.filter(pk=self.request.user.pk).exists():
                 context["Fav"] = True
             else:
                 context["Fav"] = False
@@ -263,6 +267,9 @@ class ArticleCreateView(CreateView):
         for i in img_inline:
             if i.cleaned_data:
                 i.save()
+        for d in self.object.author.subscribers.all():
+            send_mail('Subject here', 'Here is the message.', 'test@gmail.com',
+                      [d.email], fail_silently=False)  # TODO: help
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form, img_inline):
@@ -313,8 +320,7 @@ class ArticleUpdateView(UpdateView):
     template_name = 'blogapp/article_update.html'
 
 
-class UserArticleList(FilterView, PasswordChangeView):
-    filterset_class = FilterUser
+class UserArticleList(ListView,LoginRequiredMixin):
     model = Article
     paginate_by = 10
     template_name = 'blogapp/article_user_list.html'
@@ -334,7 +340,11 @@ class UserArticleList(FilterView, PasswordChangeView):
 class PasswordView(PasswordChangeView):
     form_class = PasswordChangeForm
     success_url = reverse_lazy('accounts:profile')
-    template_name = 'blogapp/article_user_list.html'
+    template_name = 'blogapp/article_update.html'
+
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.ERROR, form.errors)
+        return redirect(reverse_lazy('accounts:profile'))
 
 
 class UserUpdateView(UpdateView):
@@ -348,6 +358,10 @@ class UserUpdateView(UpdateView):
 
     def get_object(self):
         return self.request.user
+
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.ERROR, form.errors)
+        return redirect(reverse_lazy('accounts:profile'))
 
 
 class ArticleDeleteView(DeleteView):

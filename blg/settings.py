@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_registration',
     'debug_toolbar',
     'django_bootstrap_breadcrumbs',
     'treebeard',
@@ -152,3 +153,17 @@ LOCALE_PATH = (
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey' # this is exactly the value 'apikey'
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+# EMAIL_HOST = 'localhost'
+# EMAIL_USE_TLS = True
+# EMAIL_PORT = EMAIL_PORT
+# EMAIL_HOST_USER = EMAIL_HOST_USER
+# EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD

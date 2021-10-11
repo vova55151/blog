@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
@@ -78,6 +80,38 @@ class UserRegistrationForm(forms.Form):
         return data['password2']
 
 
+class UserForm(RegistrationForm):
+    class Meta(RegistrationForm.Meta):
+        model = get_user_model()
+
+
+class UserRegistrationForm(forms.Form):
+    email = forms.CharField(label='email', widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Введите email'
+    }))
+    password = forms.CharField(label='password', widget=forms.PasswordInput(
+        attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите password'
+        }))
+    password2 = forms.CharField(label='password', widget=forms.PasswordInput(
+        attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите password'
+        }))
+
+    class Meta:
+        model = get_user_model()
+        fields = ('email',)
+
+    def clean_password2(self):
+        data = self.cleaned_data
+        if data['password'] != data['password2']:
+            raise forms.ValidationError('Пароли не совпадают')
+        return data['password2']
+
+
 class UserModelForm(forms.ModelForm):
     """
 
@@ -86,3 +120,15 @@ class UserModelForm(forms.ModelForm):
     class Meta:
         model = get_user_model()
         fields = ['first_name', 'last_name', 'phone', 'img']
+
+    def clean_phone(self):
+        """
+        Вызывается при отправке формы.Проверяет валидность номера телефона
+        Возвращает ValidationError,если форма не валидна
+        """
+        phone = self.cleaned_data.get('phone')
+        pattern = r'^\+[0-9\-\+]{10}$'
+        if re.match(pattern, phone):
+            return phone
+        else:
+            raise forms.ValidationError("Ведите правильный номер телефона")

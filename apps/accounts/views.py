@@ -4,10 +4,11 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, DeleteView, UpdateView
-from django_registration.backends.activation.views import RegistrationView
+from django.views import View
+from django.views.generic import DetailView, DeleteView, UpdateView, TemplateView
+from django_registration.backends.activation.views import RegistrationView, ActivationView
 
-from apps.accounts.forms import UserLoginForm, UserRegistrationForm, UserModelForm
+from apps.accounts.forms import UserLoginForm, UserRegistrationForm, UserModelForm, UserForm
 from apps.blogapp.models import Article
 
 
@@ -16,7 +17,8 @@ def favourite_list(request):
     new = Article.objects.filter(favourites=request.user)
     return render(request, 'accounts/favourite_list.html', {'new': new})
 
-#TODO : через Update View в post или form_valid добавить к кнопкам сердечко https://icons.getbootstrap.com/#install
+
+
 @login_required
 def favourite_add(request, slug):
     post = get_object_or_404(Article, slug=slug)
@@ -28,6 +30,18 @@ def favourite_add(request, slug):
         post.favourites.add(request.user)
     post.save()
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+class FavouritesAddView(View):
+    def get(self, request, **kwargs):
+        post = get_object_or_404(Article, slug=kwargs['slug'])
+        if post.favourites.filter(id=request.user.id).exists():
+            post.favourites.remove(self.request.user)
+        else:
+            post.favourites.add(self.request.user)
+        post.likes_count = post.favourites.count()
+        post.save()
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
 #
@@ -121,3 +135,27 @@ def subscribers_add(request, pk):
     else:
         request.user.subscribers.add(user)
     return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+class UserRegistrationView(RegistrationView):
+    template_name = 'accounts/registration_form.html'
+    form_class = UserForm
+    email_body_template = 'accounts/activation_email_body.txt'
+    email_subject_template = 'accounts/activation_email_subject.txt'
+    success_url = reverse_lazy('success_registration')
+
+
+class SuccessRegistrationView(TemplateView):
+    template_name = 'accounts/success_registration.html'
+
+
+class UserActivationView(ActivationView):
+    success_url = reverse_lazy('blogapp:home')
+
+    def activate(self, *args, **kwargs):
+        username = self.validate_key(kwargs.get("activation_key"))
+        user = self.get_user(username)
+        user.is_active = True
+        user.save()
+        login(self.request, user)
+        return user

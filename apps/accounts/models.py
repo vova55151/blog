@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+from django.core.mail import send_mail
 from django.db import models
 
 # Create your models here.
@@ -46,6 +47,8 @@ class User(AbstractUser):
         """
         return reverse('accounts:profile')
 
+    def email_user(self, subject, message, from_email=None, **kwargs):
+        """Send an email to this user."""
+        send_mail(subject, message, from_email, [self.email], **kwargs)
 
-def get_email_field_name():
-    return get_user_model().email
+
