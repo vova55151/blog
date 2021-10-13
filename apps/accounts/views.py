@@ -131,7 +131,7 @@ class ProfileDelete(LoginRequiredMixin, DeleteView):
 #     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
-class SubList(ListView):
+class SubList(LoginRequiredMixin, ListView):
     model = get_user_model()
     template_name = 'accounts/sub_list.html'
     paginate_by = 10
@@ -142,7 +142,7 @@ class SubList(ListView):
         return context
 
 
-class FavList(LoginRequiredMixin,ListView):
+class FavList(LoginRequiredMixin, ListView):
     model = Article
     template_name = 'accounts/favourite_list.html'
     paginate_by = 10
@@ -165,7 +165,7 @@ class SuccessRegistrationView(TemplateView):
     template_name = 'accounts/success_registration.html'
 
 
-class SubscribersAdd( LoginRequiredMixin, View):
+class SubscribersAdd(LoginRequiredMixin, View):
 
     def get(self, request, **kwargs):
         author = get_user_model().objects.get(pk=kwargs['pk'])

@@ -264,7 +264,7 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
 #     template_name = 'blogapp/img_create.html'
 
 
-class ArticleUpdateView(UpdateView):
+class ArticleUpdateView(LoginRequiredMixin, UpdateView):
     """
     Класс для редактирования поста
     """
@@ -276,7 +276,7 @@ class ArticleUpdateView(UpdateView):
         return reverse_lazy('blogapp:update', kwargs={'slug': self.get_object().slug})
 
 
-class UserArticleList(ListView, LoginRequiredMixin):
+class UserArticleList(LoginRequiredMixin, ListView):
     """
     Личный кабинет с формой смены пароля,данных пользователя и списка его статей
     """
