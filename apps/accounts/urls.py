@@ -8,15 +8,14 @@ app_name = 'accounts'
 urlpatterns = [
     path('login/', UserLoginView.as_view(), name='login'),
     path('logout/', UserLogoutView.as_view(), name='logout'),
-    path('register/', registration_view, name='register'),
+    path('register/', UserRegistrationView.as_view(), name='register'),  # TODO: переделелать
     path('fav/<str:slug>/', FavouritesAddView.as_view(), name='favourite_add'),
-    path('fav/', favourite_list, name='favourite_list'),
-    path('profile/', UserArticleList.as_view(), name='profile'),
+    path('fav/', FavList.as_view(), name='favourite_list'),
+    path('', UserArticleList.as_view(), name='profile'),
     path('update/', UserUpdateView.as_view(), name='profile-update'),
     path('pass_update/', PasswordView.as_view(),
          name='pass-update'),
-    path('<int:pk>/delete', ProfileDelete.as_view(), name='profile_delete'),
-    path('<int:pk>/sub', subscribers_add, name='subscribers_add'),
-    path('sublist', subscribers_list, name='subscribers_list'),
-
+    # path('<int:pk>/delete', ProfileDelete.as_view(), name='profile_delete'),
+    path('<int:pk>/sub', SubscribersAdd.as_view(), name='subscribers_add'),
+    path('sublist/', SubList.as_view(), name='subscribers_list'),
 ]

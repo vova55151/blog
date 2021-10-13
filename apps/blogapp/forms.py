@@ -8,29 +8,44 @@ from apps.blogapp.models import *
 
 class ArticleModelForm(forms.ModelForm):
     """
-    Модельная форма проекта
+    Модельная форма поста
     """
 
     class Meta:
         model = Article
         fields = ['name', 'descr', 'category', 'content', 'slug', 'preview', 'comments_count', 'likes_count']
+    # TODO: AttributeError: 'str' object has no attribute 'get'
 
-        # def clean_cost(self):
-    #     """
-    #     Вызывается при отправке формы.Проверяет,состоит ли стоимость только из цифр
-    #     Возвращает ValidationError,если форма не валидна
-    #     """
-    #     cost = self.cleaned_data.get('cost')
-    #     pattern = r'^[\W\d\W]*$'
-    #     if re.match(pattern, cost):
-    #         return cost
-    #     else:
-    #         raise forms.ValidationError("Стоимость должна состоять только из цифр")
+    def clean_name(self):
+        """
+        Вызывается при отправке формы.Проверяет ,есть ли аналогичное название поста в БД
+        Возвращает ValidationError,если форма не валидна
+        """
+        name = self.cleaned_data['name']
+        qs = Article.objects.filter(name__iexact=name)
+        if self.instance is not None:
+            qs = qs.exclude(slug=self.instance.slug)
+        if qs.exists():
+            raise forms.ValidationError("Введите уникальное название")
+        return name
+
+    def clean_slug(self):
+        """
+        Проверяет ,есть ли аналогичный slug в БД
+        Возвращает ValidationError,если форма не валидна
+        """
+        slug = self.cleaned_data['slug']
+        qs = Article.objects.filter(slug__iexact=slug)
+        if self.instance is not None:
+            qs = qs.exclude(slug=self.instance.slug)
+        if qs.exists():
+            raise forms.ValidationError("Введите уникальное название")
+        return slug
 
 
 class CommentModelForm(forms.ModelForm):
     """
-    Модельная форма проекта
+    Модельная форма комментария
     """
 
     class Meta:
@@ -40,7 +55,7 @@ class CommentModelForm(forms.ModelForm):
 
 class ImgModelForm(forms.ModelForm):
     """
-    Модельная форма проекта
+    Модельная форма фото
     """
 
     class Meta:
@@ -52,4 +67,4 @@ Img_inline = inlineformset_factory(Article,
                                    Image,
                                    fields=['img', 'alt', 'article'],
                                    form=ImgModelForm,
-                                   extra=2, )
+                                   extra=1, )

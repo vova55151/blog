@@ -27,6 +27,9 @@ class Category(MP_Node):
             return f"--{self.name}"
 
     def save(self, *args, **kwargs):
+        """
+        Добавляет слаг
+        """
         if not self.slug:
             self.slug = from_cyrillic_to_eng(str(self.name))
 
@@ -34,12 +37,15 @@ class Category(MP_Node):
 
     def get_absolute_url(self):
         """
-        Возвращает юрл информации о компанни с определенным pk
+        Возвращает юрл главной страницы с фильтром категории
         """
         return f"/blog/?author=&category={self.pk}&name=&o="
 
 
 class Article(models.Model):
+    """
+    Модель поста
+    """
     name = models.CharField(max_length=255, verbose_name=ugettext_lazy('Название'))
     slug = models.SlugField(unique=True, verbose_name=ugettext_lazy('Slug'), null=True, blank=True)
     author = models.ForeignKey(to=get_user_model(), on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Автор'),
@@ -50,7 +56,7 @@ class Article(models.Model):
     descr = models.CharField(max_length=255, verbose_name=ugettext_lazy('Краткое описание'))
     content = RichTextUploadingField(verbose_name=ugettext_lazy('Контент'))
     favourites = models.ManyToManyField(to=get_user_model(), related_name='favourites', default=None, blank=True)
-    rating = models.CharField(max_length=255, verbose_name=ugettext_lazy('Средний рейтинг'))
+    rating = models.CharField(default=0, max_length=255, verbose_name=ugettext_lazy('Средний рейтинг'))
     comments_count = models.IntegerField(default=0, verbose_name=ugettext_lazy('Количество отзывов'))
     likes_count = models.IntegerField(default=0, verbose_name=ugettext_lazy('Количество лайков'))
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=ugettext_lazy('Дата создания'))
@@ -60,25 +66,24 @@ class Article(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-
+        """
+        Добавляет слаг
+        """
         if not self.slug:
             self.slug = from_cyrillic_to_eng(str(self.name))
-            if Article.objects.filter(slug=self.slug).count() > 0:
-                self.slug = from_cyrillic_to_eng(str(f'{self.name}_{self.author}'))
-
-        # self.comments_count = self.comment_set.all().count()# v comment
-        # self.likes_count = self.like_set.all().count()# v like
-        # self.rating_average = self.comment_set.aggregate()
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         """
-        Возвращает юрл информации о компанни с определенным pk
+        Возвращает юрл информации о посте
         """
         return reverse('blogapp:detail', args=[str(self.slug)])
 
 
 class Image(models.Model):
+    """
+    Модель картинки поста
+    """
     img = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Дополнительные фото'), default=None)
     alt = models.CharField(max_length=255, verbose_name=ugettext_lazy('Краткое описание'))
     article = models.ForeignKey(to=Article, verbose_name=ugettext_lazy('Статья'), on_delete=models.SET_NULL,
@@ -86,6 +91,9 @@ class Image(models.Model):
 
 
 class Comment(models.Model):
+    """
+    Модель комментария
+    """
     author = models.ForeignKey(to=get_user_model(), verbose_name=ugettext_lazy('Автор'), on_delete=models.SET_NULL,
                                null=True)
     article = models.ForeignKey(to=Article, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Статья'),
@@ -111,8 +119,11 @@ class Comment(models.Model):
     date_edit = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
+        """
+        Добавляет слаг,считает кол-во комментариев,средний рейтинг поста
+        """
         model_class = self._meta.model
-        # if model_class.objects.filter(author=self.author, article=self.article).exists(): #TODO : СИГНАЛЫ
+        # if model_class.objects.filter(author=self.author, article=self.article).exists():
         #     print(model_class.objects.filter(author=self.author, article=self.article).exists())
         # print(model_class.objects.filter(author=self.author, article=self.article, status="P").exists())
 
@@ -121,33 +132,25 @@ class Comment(models.Model):
 
         object_list = model_class.objects.filter(article=self.article, status="P")  # .exclude(author=self.author)
         if object_list:
-
-            self.article.rating = Comment.objects.all().filter(article=self.article, status="P").aggregate(Avg('rating')).get('rating__avg')
+            self.article.rating = Comment.objects.all().filter(article=self.article, status="P").aggregate(
+                Avg('rating')).get('rating__avg')
             self.article.comments_count = Comment.objects.all().filter(article=self.article, status="P").count()
-
-            # self.article.rating = statistics.mean([int(i.rating) for i in object_list])
-            # self.article.comments_count += 0.5  # TODO: 1ый сейв commit = False
             self.article.save()
-        super().save()  # TODO: @#!#@!@$@@$!#$SA
+        super().save()
 
 
+# class TextPage(models.Model):
+#     """
+#     ???
+#     """
+#     name = models.CharField(max_length=255, verbose_name=ugettext_lazy('Название'))
+#     slug = models.SlugField(unique=True)
+#     statusl = [
+#         ('D', 'Draft'),
+#         ('P', 'Published')
+#     ]
+#     status = models.CharField(choices=statusl, max_length=255,
+#                               verbose_name=ugettext_lazy('Статус обращения'))  # Селект Draft Published
 #
-# class Like(models.Model):
-#     author = models.ForeignKey(to=get_user_model(), verbose_name=ugettext_lazy('Автор'), on_delete=models.SET_NULL,
-#                                null=True)
-#     article = models.ForeignKey(to=Article, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Статья'),
-#                                 null=True)
-
-
-class TextPage(models.Model):
-    name = models.CharField(max_length=255, verbose_name=ugettext_lazy('Название'))
-    slug = models.SlugField(unique=True)
-    statusl = [
-        ('D', 'Draft'),
-        ('P', 'Published')
-    ]
-    status = models.CharField(choices=statusl, max_length=255,
-                              verbose_name=ugettext_lazy('Статус обращения'))  # Селект Draft Published
-
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_edit = models.DateTimeField(auto_now=True)
+#     date_created = models.DateTimeField(auto_now_add=True)
+#     date_edit = models.DateTimeField(auto_now=True)

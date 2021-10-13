@@ -11,7 +11,11 @@
 
 <form action= "{% url 'accounts:profile-update' %}" enctype= multipart/form-data method="POST">
     {% csrf_token %}
+    {{user_email}}
         {{ user_form.as_p }}
+
+
+
         <img src="{{ user.get_photo_url }}" height="150" alt="">
         <input type="submit" value="Ok"/>
      </form>

@@ -18,19 +18,28 @@ import django
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 import django_registration.backends.activation.urls
+from django.views.decorators.cache import never_cache
 from django_registration.backends.activation.views import RegistrationView
 
 from apps.accounts.forms import UserForm
 from apps.accounts.views import SuccessRegistrationView, UserActivationView, UserRegistrationView
 from blg import settings
-
+from ckeditor_uploader import views
 # TODO: локализация python manage.py makemessages -l 'ru' , python manage.py compilemessages
-
+import ckeditor_uploader.urls
 # TODO : sudo apt-get install gettext
+ckeditor_urls = [
+    re_path(r"^upload/", views.upload, name="ckeditor_upload"),
+    re_path(
+        r"^browse/",
+        never_cache(views.browse),
+        name="ckeditor_browse",
+    ),
+]
 urlpatterns = [
-    path('ckeditor/', include('ckeditor_uploader.urls')),
+    path('ckeditor/', include(ckeditor_urls)),
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 urlpatterns += i18n_patterns(

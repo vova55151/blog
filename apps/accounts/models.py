@@ -13,9 +13,6 @@ from django.utils.translation import ugettext_lazy
 class User(AbstractUser):
     """
     Переопределенная модель юзера ,использующая Email вместо юзернейма для логина
-    Атрибуты:
-    is_manager(bool): проверка,является ли юзер менеджером
-    img: Фото профиля
     """
     username = None
     subscribers = models.ManyToManyField(to="self", related_name='subscribers', default=None, blank=True)
@@ -36,6 +33,9 @@ class User(AbstractUser):
 
     @property
     def get_photo_url(self):
+        """
+        Возвращает фото юзера,если его нет - дефолтное фото профиля
+        """
         if self.img and hasattr(self.img, 'url'):
             return self.img.url
         else:
@@ -43,7 +43,7 @@ class User(AbstractUser):
 
     def get_absolute_url(self):
         """
-        Возвращает юрл информации о компанни с определенным pk
+        Возвращает юрл информации о пользователе
         """
         return reverse('accounts:profile')
 

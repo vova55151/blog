@@ -81,7 +81,7 @@
 
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     <a class="dropdown-item" href="{% url 'accounts:profile'%}">Личный кабинет</a>
-                    <a class="dropdown-item" href="{% url 'accounts:profile_delete' user.pk%}">Удалить профиль</a>
+                    <a class="dropdown-item" href="{% url 'accounts:subscribers_list'%}?next={{request.get_full_path}}">Подписки</a>
                 </div>
 
             </li>
@@ -92,7 +92,7 @@
             {% endif %}
             {% if user.is_authenticated%}
             <li class="nav-item ">
-                <a class="nav-link" href="{% url 'accounts:logout'%}?next={{request.get_full_path}}">Выйти</a>
+                <a class="nav-link" href="{% url 'accounts:logout'%}">Выйти</a>
             </li>
             {% else %}
             <li class="nav-item ">

@@ -22,7 +22,7 @@ from apps.blogapp.models import *
 
 class Filter(django_filters.FilterSet):
     """
-    Класс для корректной работы фильтра по ключевым словам
+    Настройка фильтра под древовидную структуру категорий поста
     """
 
     def filter_by_category(self, queryset=None, value=None):
@@ -49,50 +49,6 @@ class Filter(django_filters.FilterSet):
             ('category', 'category'),
             ('date_created', 'date_created'),
         ),
-
-        # labels do not need to retain order
-        # field_labels={
-        #
-        # }
-    )
-
-    class Meta:
-        model = Article
-        fields = ['author', 'category']
-
-
-class FilterUser(django_filters.FilterSet):
-    """
-    Класс для корректной работы фильтра по ключевым словам
-    """
-
-    def filter_by_category(self, queryset=None, value=None):
-        category = value
-        if category.get_descendants():
-            queryset1 = self.filter(category__in=category.get_descendants())
-            queryset2 = self.filter(category__exact=category)
-            queryset = queryset1 | queryset2
-        else:
-            queryset = self.filter(category=category)
-        return queryset
-
-    category = django_filters.ModelChoiceFilter(
-        queryset=Category.objects.all(),
-        method=filter_by_category
-    )
-
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ('rating', 'rating'),
-            ('category', 'category'),
-            ('date_created', 'date_created'),
-        ),
-
-        # labels do not need to retain order
-        # field_labels={
-        #
-        # }
     )
 
     class Meta:
@@ -102,7 +58,7 @@ class FilterUser(django_filters.FilterSet):
 
 class ArticleListView(FilterView):
     """
-    Класс для отображения списка всех проектов
+    Класс для отображения списка всех постов
     """
     model = Article
     paginate_by = 16
@@ -112,7 +68,7 @@ class ArticleListView(FilterView):
 
 class ArticleDetailView(DetailView, CreateView):
     """
-    Класс для отображения информации о проекте
+    Класс для отображения информации о посте ,списком комментариев и формой для их отправки
     """
 
     model = Article
@@ -142,9 +98,9 @@ class ArticleDetailView(DetailView, CreateView):
             comment_form = self.form_class(self.request.POST)
         else:
             comment_form = CommentModelForm()
-        # post.favourites.filter(id=request.user.id).exists():
+        author = get_user_model().objects.get(pk=self.get_object().author.pk)
         if self.request.user.is_authenticated:
-            if get_user_model().objects.filter(subscribers=self.request.user).exists():
+            if author.subscribers.filter(pk=self.request.user.pk).exists():
                 context["Sub"] = True
             else:
                 context["Sub"] = False
@@ -214,15 +170,16 @@ class ArticleDetailView(DetailView, CreateView):
 #                   'comment_form': comment_form})
 
 
-class ArticleCreateView(CreateView):
+class ArticleCreateView(LoginRequiredMixin, CreateView):
     """
-    Класс для создания проекта
+    Класс для создания поста
     """
     model = Article
     form_class = ArticleModelForm
     success_url = reverse_lazy('blogapp:home')
     template_name = 'blogapp/article_create.html'
 
+    # c img inline
     def get(self, request, *args, **kwargs):
         """
         Обрабатывает запросы GET
@@ -255,12 +212,9 @@ class ArticleCreateView(CreateView):
 
     def form_valid(self, form, img_inline):
         """
-        Вызывается, если все формы валидны. Создает экземпляр телефона ,контактных лиц и Email
-        Возвращает редирект на страницу списка компаний
+        Присваивает посту автора и рассылает имейлы его подписчикам
         """
-        # img_inline.instance = self.object
-        # img_inline.save()
-        # self.request.FILES['img']
+
         self.object = form.save(commit=False)
         self.object.author = self.request.user
         self.object = form.save()
@@ -268,66 +222,70 @@ class ArticleCreateView(CreateView):
             if i.cleaned_data:
                 i.save()
         for d in self.object.author.subscribers.all():
-            send_mail('Subject here', 'Here is the message.', 'test@gmail.com',
-                      [d.email], fail_silently=False)  # TODO: help
+            d.email_user('subject', 'message', 'from_email@test.com')
+
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form, img_inline):
         return self.render_to_response(self.get_context_data(form=form, img_inline=img_inline))
 
-    # def form_valid(self, form,img_inline):
+    # def form_valid(self, form):
     #     """
-    #     Вызывается, если все формы валидны. Создает экземпляр телефона ,контактных лиц и Email
-    #     Возвращает редирект на страницу списка компаний
+    #     Присваивает посту автора и рассылает имейлы его подписчикам
     #     """
-    #     context = self.get_context_data()
-    #     article_form = form.save(commit=False)
-    #     article_form.author = self.request.user
-    #     article_form.save()
-    #     img_inline.save()
-    #     # context['img_inline'].instance = self.object
-    #     # context['img_inline'].instance.save()
-    #     return super().form_valid(form,img_inline)
-
+    #
+    #     self.object = form.save(commit=False)
+    #     self.object.author = self.request.user
+    #     self.object = form.save()
+    #
+    #     for d in self.object.author.subscribers.all():
+    #         d.email_user('subject', 'message', 'from_email@test.com')
+    #
+    #     return HttpResponseRedirect(self.get_success_url())
+    #
     # def get_context_data(self, **kwargs):
     #     context = super().get_context_data(**kwargs)
     #     if self.request.POST:
     #         context['form'] = ArticleModelForm(self.request.POST)
-    #         context['img_inline'] = Img_inline(self.request.POST)
+    #
     #     else:
     #         context['form'] = ArticleModelForm()
-    #         context['img_inline'] = Img_inline()
+    #
     #     return context
 
 
-class ImgCreateView(CreateView):
-    """
-    Класс для создания проекта
-    """
-    model = Image
-    form_class = ImgModelForm
-    success_url = reverse_lazy('blogapp:home')
-    template_name = 'blogapp/img_create.html'
+# class ImgCreateView(CreateView):
+#     """
+#     Класс для создания проекта
+#     """
+#     model = Image
+#     form_class = ImgModelForm
+#     success_url = reverse_lazy('blogapp:home')
+#     template_name = 'blogapp/img_create.html'
 
 
 class ArticleUpdateView(UpdateView):
     """
-    Класс для редактирования проекта
+    Класс для редактирования поста
     """
     model = Article
     form_class = ArticleModelForm
-    success_url = reverse_lazy('blogapp:home')
     template_name = 'blogapp/article_update.html'
 
+    def get_success_url(self):
+        return reverse_lazy('blogapp:update', kwargs={'slug': self.get_object().slug})
 
-class UserArticleList(ListView,LoginRequiredMixin):
+
+class UserArticleList(ListView, LoginRequiredMixin):
+    """
+    Личный кабинет с формой смены пароля,данных пользователя и списка его статей
+    """
     model = Article
     paginate_by = 10
     template_name = 'blogapp/article_user_list.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data()
-
         context['pass_change'] = PasswordChangeForm(self.request.user)
         context['user_form'] = UserModelForm(instance=self.request.user)
 
@@ -338,6 +296,9 @@ class UserArticleList(ListView,LoginRequiredMixin):
 
 
 class PasswordView(PasswordChangeView):
+    """
+    Класс для редактирования пароля
+    """
     form_class = PasswordChangeForm
     success_url = reverse_lazy('accounts:profile')
     template_name = 'blogapp/article_update.html'
@@ -349,7 +310,7 @@ class PasswordView(PasswordChangeView):
 
 class UserUpdateView(UpdateView):
     """
-    Класс для редактирования проекта
+    Класс для редактирования поста
     """
     model = get_user_model()
     form_class = UserModelForm
@@ -366,7 +327,7 @@ class UserUpdateView(UpdateView):
 
 class ArticleDeleteView(DeleteView):
     """
-    Класс для удаления проекта
+    Класс для удаления поста
     """
     model = Article
     success_url = reverse_lazy('blogapp:home')

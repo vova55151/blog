@@ -1,38 +1,38 @@
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import DetailView, DeleteView, UpdateView, TemplateView
+from django.views.generic import DetailView, DeleteView, UpdateView, TemplateView, ListView
 from django_registration.backends.activation.views import RegistrationView, ActivationView
 
 from apps.accounts.forms import UserLoginForm, UserRegistrationForm, UserModelForm, UserForm
 from apps.blogapp.models import Article
 
 
-@login_required
-def favourite_list(request):
-    new = Article.objects.filter(favourites=request.user)
-    return render(request, 'accounts/favourite_list.html', {'new': new})
+# @login_required
+# def favourite_list(request):
+#     new = Article.objects.filter(favourites=request.user)
+#     return render(request, 'accounts/favourite_list.html', {'new': new})
+#
+#
+# @login_required
+# def favourite_add(request, slug):
+#     post = get_object_or_404(Article, slug=slug)
+#     if post.favourites.filter(id=request.user.id).count() > 0:
+#         post.favourites.remove(request.user)
+#         post.likes_count -= 1
+#     else:
+#         post.likes_count += 1
+#         post.favourites.add(request.user)
+#     post.save()
+#     return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
-
-@login_required
-def favourite_add(request, slug):
-    post = get_object_or_404(Article, slug=slug)
-    if post.favourites.filter(id=request.user.id).count() > 0:
-        post.favourites.remove(request.user)
-        post.likes_count -= 1
-    else:
-        post.likes_count += 1
-        post.favourites.add(request.user)
-    post.save()
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
-
-
-class FavouritesAddView(View):
+class FavouritesAddView(LoginRequiredMixin, View):
     def get(self, request, **kwargs):
         post = get_object_or_404(Article, slug=kwargs['slug'])
         if post.favourites.filter(id=request.user.id).exists():
@@ -63,23 +63,18 @@ class FavouritesAddView(View):
 #     return redirect(reverse_lazy('blogapp:home'))
 #
 
-def registration_view(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            new_user = form.save(commit=False)
-            new_user.set_password(form.cleaned_data['password'])
-            new_user.save()
-            return render(request, 'accounts/register_done.html', {'new_user': new_user})
-        return render(request, 'accounts/registration_form.html', {'form': form})
-    else:
-        form = UserRegistrationForm()
-        return render(request, 'accounts/registration_form.html', {'form': form})
-
-
-# TODO : sendgreed
-
-# class UserRegistrationView(RegistrationView):
+# def registration_view(request):
+#     if request.method == 'POST':
+#         form = UserRegistrationForm(request.POST)
+#         if form.is_valid():
+#             new_user = form.save(commit=False)
+#             new_user.set_password(form.cleaned_data['password'])
+#             new_user.save()
+#             return render(request, 'accounts/register_done.html', {'new_user': new_user})
+#         return render(request, 'accounts/registration_form.html', {'form': form})
+#     else:
+#         form = UserRegistrationForm()
+#         return render(request, 'accounts/registration_form.html', {'form': form})
 
 
 class UserLoginView(LoginView):
@@ -90,51 +85,72 @@ class UserLoginView(LoginView):
 
 class UserLogoutView(LogoutView):
     def get_next_page(self):
-        return self.request.GET.get('next', '/')
+        return reverse_lazy('blogapp:home')
 
 
-class ProfileDetail(DetailView):
-    model = get_user_model()
-    template_name = 'accounts/profile_detail.html'
+# class ProfileDetail(DetailView, LoginRequiredMixin):
+#     model = get_user_model()
+#     template_name = 'accounts/profile_detail.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         if get_user_model().objects.filter(subscribers=self.request.user).exists():
+#             context["Sub"] = True
+#         else:
+#             context["Sub"] = False
+#         return context
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        if get_user_model().objects.filter(subscribers=self.request.user).exists():
-            context["Sub"] = True
-        else:
-            context["Sub"] = False
-        return context
 
-
-class ProfileDelete(DeleteView):
+class ProfileDelete(LoginRequiredMixin, DeleteView):
     model = get_user_model()
     template_name = 'accounts/profile_delete.html'
     success_url = reverse_lazy('blogapp:home')
 
 
-class ProfileUpdate(UpdateView):
+# class ProfileUpdate(UpdateView):
+#     model = get_user_model()
+#     template_name = 'accounts/profile_update.html'
+#     form_class = UserModelForm
+#
+#     def get_success_url(self):
+#         return reverse_lazy('accounts:profile', kwargs={'pk': self.get_object().pk})
+
+
+# @login_required
+# def subscribers_list(request):
+#     return render(request, 'accounts/sub_list.html', {'new': new})
+#
+#
+# @login_required
+# def subscribers_add(request, pk):
+#     user = get_object_or_404(get_user_model(), pk=pk)
+#     if user.subscribers.filter(pk=request.user.pk).exists():
+#         request.user.subscribers.remove(user)
+#     else:
+#         request.user.subscribers.add(user)
+#     return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+class SubList(ListView):
     model = get_user_model()
-    template_name = 'accounts/profile_update.html'
-    form_class = UserModelForm
+    template_name = 'accounts/sub_list.html'
+    paginate_by = 10
 
-    def get_success_url(self):
-        return reverse_lazy('accounts:profile', kwargs={'pk': self.get_object().pk})
-
-
-@login_required
-def subscribers_list(request):
-    new = get_user_model().objects.filter(subscribers=request.user)
-    return render(request, 'accounts/sub_list.html', {'new': new})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['new'] = get_user_model().objects.filter(subscribers=self.request.user)
+        return context
 
 
-@login_required
-def subscribers_add(request, pk):
-    user = get_object_or_404(get_user_model(), pk=pk)
-    if user.subscribers.filter(pk=request.user.pk).exists():
-        request.user.subscribers.remove(user)
-    else:
-        request.user.subscribers.add(user)
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+class FavList(LoginRequiredMixin,ListView):
+    model = Article
+    template_name = 'accounts/favourite_list.html'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['new'] = Article.objects.filter(favourites=self.request.user)
+        return context
 
 
 class UserRegistrationView(RegistrationView):
@@ -147,6 +163,19 @@ class UserRegistrationView(RegistrationView):
 
 class SuccessRegistrationView(TemplateView):
     template_name = 'accounts/success_registration.html'
+
+
+class SubscribersAdd( LoginRequiredMixin, View):
+
+    def get(self, request, **kwargs):
+        author = get_user_model().objects.get(pk=kwargs['pk'])
+        subscriber = self.request.user
+        if subscriber != author:
+            if author.subscribers.filter(pk=subscriber.pk).exists():
+                author.subscribers.remove(subscriber)
+            else:
+                author.subscribers.add(subscriber)
+        return HttpResponseRedirect(self.request.GET.get('next', ''))
 
 
 class UserActivationView(ActivationView):

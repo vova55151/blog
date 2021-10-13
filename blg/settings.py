@@ -10,10 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+import smtplib
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.utils.translation import ugettext_lazy
+from sendgrid import SendGridAPIClient
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -50,7 +52,7 @@ INSTALLED_APPS = [
 
 ]
 
-CKEDITOR_UPLOAD_PATH = 'media/'
+CKEDITOR_UPLOAD_PATH = 'uploads/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -155,15 +157,12 @@ INTERNAL_IPS = [
 ]
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_HOST_USER = 'apikey' # this is exactly the value 'apikey'
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-# EMAIL_HOST = 'localhost'
+#TODO : работает
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# SENDGRID_API_KEY = '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'
+# EMAIL_HOST = 'smtp.sendgrid.net'
+# EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
+# EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+# EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
-# EMAIL_PORT = EMAIL_PORT
-# EMAIL_HOST_USER = EMAIL_HOST_USER
-# EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
+# DEFAULT_FROM_EMAIL = 'wc.for.sendgrid@gmail.com'

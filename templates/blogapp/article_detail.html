@@ -42,17 +42,17 @@
 {% if user.is_authenticated %}
     {% if Fav == True %}
 
-    <a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary"><i class="bi bi-heart"></i> Удалить из избранного</a>
+    <a href="{% url 'accounts:favourite_add' article.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart"></i> Удалить из избранного</a>
 
     {%else%}
-    <a href="{% url 'accounts:favourite_add' article.slug %}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i> В избранное</a>
+    <a href="{% url 'accounts:favourite_add' article.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i> В избранное</a>
     {%endif%}
 
     {% if Sub == True %}
-    <a href="{% url 'accounts:subscribers_add' article.author.pk %}" class="btn btn-outline-primary">Отписаться</a>
+    <a href="{% url 'accounts:subscribers_add' article.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Отписаться</a>
     {%else%}
 
-    <a href="{% url 'accounts:subscribers_add' article.author.pk %}" class="btn btn-outline-primary">Подписаться</a>
+    <a href="{% url 'accounts:subscribers_add' article.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Подписаться</a>
     {%endif%}
 {%endif%}
 <br>
@@ -69,7 +69,7 @@
             {%endif%}
 
           <div><img src="{{ art.author.get_photo_url }}" width="30" height="20" class="img-responsive thumbnail " alt="img">
-                  <a href="{{ art.author.get_absolute_url }}">{{ art.author }}</a></div>
+              <p>{{ art.author }}</p>    </div>
 
       </li>
 
@@ -89,7 +89,7 @@
 <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 
         <div> <p class="card-text">{{c.text|striptags|safe }}</p>
-          <p><a href="{{ c.author.get_absolute_url }}">{{ c.author }}</a></p>
+          <p>{{ c.author }}</p>
             <p>{{c.date_created}}</p>
             <p>{{c.rating}}</p>
 
