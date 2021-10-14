@@ -41,7 +41,7 @@ class FavouritesAddView(LoginRequiredMixin, View):
             post.favourites.add(self.request.user)
         post.likes_count = post.favourites.count()
         post.save()
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        return HttpResponseRedirect(reverse_lazy('blogapp:detail', kwargs={'slug': post.slug}))
 
 
 #
@@ -138,8 +138,10 @@ class SubList(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['new'] = get_user_model().objects.filter(subscribers=self.request.user)
         return context
+
+    def get_queryset(self):
+        return get_user_model().objects.filter(subscribers=self.request.user)
 
 
 class FavList(LoginRequiredMixin, ListView):
@@ -149,8 +151,10 @@ class FavList(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['new'] = Article.objects.filter(favourites=self.request.user)
         return context
+
+    def get_queryset(self):
+        return Article.objects.filter(favourites=self.request.user)
 
 
 class UserRegistrationView(RegistrationView):
@@ -169,12 +173,12 @@ class SubscribersAdd(LoginRequiredMixin, View):
 
     def get(self, request, **kwargs):
         author = get_user_model().objects.get(pk=kwargs['pk'])
-        subscriber = self.request.user
-        if subscriber != author:
-            if author.subscribers.filter(pk=subscriber.pk).exists():
-                author.subscribers.remove(subscriber)
+        if self.request.user != author:
+            if author.subscribers.filter(pk=self.request.user.pk).exists():
+                author.subscribers.remove(self.request.user)
             else:
-                author.subscribers.add(subscriber)
+                author.subscribers.add(self.request.user)
+            author.save()
         return HttpResponseRedirect(self.request.GET.get('next', ''))
 
 

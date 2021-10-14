@@ -5,7 +5,7 @@ from django.db import models
 from treebeard.mp_tree import MP_Node
 
 
-class Menu(MP_Node):
+class Menu(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
     url = models.CharField(max_length=200, verbose_name='URL')
     targets = [

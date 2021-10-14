@@ -1,12 +1,16 @@
-from django.urls import path
-from .views import *
 
+from .views import *
+from django.urls import path, include, re_path
 app_name = 'blogapp'
 
+
 urlpatterns = [
-    path('create/', ArticleCreateView.as_view(), name='create'),
     path('', ArticleListView.as_view(model=Article), name='home'),
-    path('update/<str:slug>/', ArticleUpdateView.as_view(), name='update'),#TODO: переделелать
-    path('detail/<str:slug>/', ArticleDetailView.as_view(), name='detail'),
-    path('delete/<str:slug>/', ArticleDeleteView.as_view(), name='delete'),
+    path('create/', ArticleCreateView.as_view(),name='create'),
+    path('<str:slug>/', include([
+
+        path('update/', ArticleUpdateView.as_view(), name='update'),
+        path('detail/', ArticleDetailView.as_view(), name='detail'),
+        path('delete/', ArticleDeleteView.as_view(), name='delete'),
+    ])),
 ]

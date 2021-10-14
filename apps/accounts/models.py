@@ -15,7 +15,7 @@ class User(AbstractUser):
     Переопределенная модель юзера ,использующая Email вместо юзернейма для логина
     """
     username = None
-    subscribers = models.ManyToManyField(to="self", related_name='subscribers', default=None, blank=True)
+    subscribes = models.ManyToManyField('User', related_name='subscribers')
     phone = models.CharField(max_length=100, verbose_name='Телефон', blank=True, null=True)
     email = models.EmailField(ugettext_lazy('email address'), unique=True)
     img = models.ImageField(blank=True, null=True, verbose_name='Фото профиля')
@@ -47,8 +47,6 @@ class User(AbstractUser):
         """
         return reverse('accounts:profile')
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
-        """Send an email to this user."""
-        send_mail(subject, message, from_email, [self.email], **kwargs)
+
 
 

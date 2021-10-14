@@ -98,9 +98,9 @@ class ArticleDetailView(DetailView, CreateView):
             comment_form = self.form_class(self.request.POST)
         else:
             comment_form = CommentModelForm()
-        author = get_user_model().objects.get(pk=self.get_object().author.pk)
+
         if self.request.user.is_authenticated:
-            if author.subscribers.filter(pk=self.request.user.pk).exists():
+            if get_user_model().objects.get(pk=self.get_object().author.pk).subscribers.filter(pk=self.request.user.pk).exists():
                 context["Sub"] = True
             else:
                 context["Sub"] = False
