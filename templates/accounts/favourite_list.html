@@ -1,14 +1,17 @@
 {% extends "base_generic.html" %}
+{%load i18n %}
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
+{% trans "Блог" as tstring%}
+{% trans "Список избранного" as tstring2%}
 {% block breadcrumbs %}
-    {% breadcrumb "Блог" "blogapp:home" %}
-    {% breadcrumb "Список избранного" "subscribers_list"%}
+    {% breadcrumb tstring "blogapp:home" %}
+    {% breadcrumb tstring2 "subscribers_list"%}
 {% endblock %}
 {% render_breadcrumbs %}
 {% for post in object_list %}
 
-
+    <h1>{% trans "Список избранного" %}</h1>
       <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 
         <div><a style="padding: 75px;" href="{{ post.get_absolute_url }}">{{ post.name }}</a></div>

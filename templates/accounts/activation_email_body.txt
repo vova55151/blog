@@ -3,11 +3,3 @@
 Для активации вашего аккаунта необходимо перейти по ссылке:
 {{ site }}/accounts/activate/{{ activation_key }}/
 Спасибо!
-
-
-
-sudo docker run --restart=always -d --name redis \
-   -v /home/wcpc/proj/blog/redis1.conf:/usr/local/etc/redis/redis.conf \
-   -v /opt/redis/data:/data \
-   -p 127.0.0.1:6379:6379 redis redis-server \
-   /usr/local/etc/redis/redis.conf

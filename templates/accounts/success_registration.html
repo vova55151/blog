@@ -1,9 +1,9 @@
 {% extends 'base_generic.html' %}
-
+{% load i18n %}
 
 {% block content %}
-<h1>Приветствуем Вас, {{ new_user.username }}</h1>
+<h1>{% trans "Приветствуем Вас, " %}{{ new_user.username }}</h1>
 
-<p>Вы зарегистрировались. На почту отправлено письмо . </p>
+<p>{% trans "Вы зарегистрировались. На почту отправлено письмо . " %}</p>
 
 {% endblock %}

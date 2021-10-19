@@ -1,9 +1,9 @@
 {% extends 'base_generic.html' %}
-
+{% load i18n %}
 
 {% block content %}
-<h1>Приветствуем Вас, {{ new_user.username }}</h1>
+<h1>{% trans "Приветствуем Вас," %}{{ new_user.username }}</h1>
 
-<p>Вы зарегистрировались. Теперь Вы можете <a href="{% url 'accounts:login'%}">войти</a> </p>
+<p>{% trans "Вы зарегистрировались. Теперь Вы можете " %}<a href="{% url 'accounts:login'%}">{% trans "войти" %}</a> </p>
 
 {% endblock %}

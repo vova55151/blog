@@ -1,16 +1,18 @@
 {% extends "base_generic.html" %}
-
+{% load i18n %}
 {% block content %}
+{% trans "Блог" as tstring%}
+{% trans "Статья" as tstring2%}
 {% load django_bootstrap_breadcrumbs %}
 {% block breadcrumbs %}
-    {% breadcrumb "Блог" "blogapp:home" %}
-    {% breadcrumb "Статья" "blogapp:update" article.slug %}
+    {% breadcrumb tstring "blogapp:home" %}
+    {% breadcrumb tstring2 "blogapp:update" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
 <form method="post" action="">
     {%  csrf_token %}
     {{ form.as_p }}
-
+    {{ img_inline.as_p }}
 
     <p><button type="submit">Сохранить</button></p>
 </form>

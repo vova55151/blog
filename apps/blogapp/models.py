@@ -114,7 +114,7 @@ class Comment(models.Model):
                                 null=True)
 
     statusl = (
-        ('D', 'Draft'),
+        ('D', 'Draft'),#TODO : в отдельный файл
         ('P', 'Published'),
 
     )
@@ -123,7 +123,7 @@ class Comment(models.Model):
         ('1', '1'),
         ('2', '2'),
         ('3', '3'),
-        ('4', '4'),
+        ('4', '4'),#TODO : в отдельный файл
         ('5', '5'),
     )
     rating = models.CharField(choices=ratingl, max_length=100, verbose_name=ugettext_lazy('Рейтинг'), null=True,

@@ -98,7 +98,7 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentModelForm
-    template_name = 'blogapp/article_create.html'
+    template_name = 'blogapp/comment_create.html'
 
     def get_object(self):
         return super().get_object(
@@ -181,9 +181,56 @@ class ArticleUpdateView(LoginRequiredMixin, UpdateView):
     """
     Класс для редактирования поста
     """
+    query_pk_and_slug = True
     model = Article
     form_class = ArticleModelForm
     template_name = 'blogapp/article_update.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['form'] = ArticleModelForm(self.request.POST)
+            context['img_inline'] = Img_inline(self.request.POST)
+
+        else:
+            context['form'] = ArticleModelForm(instance=self.object)
+            context['img_inline'] = Img_inline(instance=self.object)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Обрабатывает запросы POST, создавая экземпляр формы и его встроенные наборы форм с переданными переменными POST
+         Возвращает методы валидации формы
+        """
+        self.object = None
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        img_inline = Img_inline(self.request.POST, self.request.FILES, instance=form.instance)
+        if form.is_valid() and img_inline.is_valid():
+
+            return self.form_valid(form, img_inline)
+        else:
+            return self.form_invalid(form, img_inline)
+
+    def form_invalid(self, form, img_inline):
+        return self.render_to_response(self.get_context_data(form=form, img_inline=img_inline))
+    #TODO : кнопка" подробнее " 2.2.2.1 пункт
+    def form_valid(self, form, img_inline):
+        """
+        Присваивает посту автора и рассылает имейлы его подписчикам
+        """
+        context = self.get_context_data()
+        _form = context['form']
+        img_inline = context['img_inline']
+        if form.is_valid() and img_inline.is_valid():
+            self.object = form.save()
+            _form.instance = self.object
+            _form.save()
+            img_inline.instance = self.object
+            img_inline.save()
+            return HttpResponseRedirect(self.get_success_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
 
     def get_success_url(self):
         return reverse_lazy('blogapp:update', kwargs={'slug': self.get_object().slug})

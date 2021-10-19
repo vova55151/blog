@@ -6,7 +6,7 @@
 {% load django_bootstrap_breadcrumbs %}
 {% block breadcrumbs %}
     {% breadcrumb "Блог" "blogapp:home" %}
-    {% breadcrumb article.category article.category.get_absolute_url %}
+    {% breadcrumb object.category object.category.get_absolute_url %}
     {% breadcrumb "Статья" "blogapp:detail" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
@@ -17,9 +17,8 @@
 <p>{{object.name}}</p>
 
 <p>{{object.descr}}</p>
-<a href="/?author=&category={{object.category.pk}}&name=&o=">{{object.category}}</a>
-<br>
-<a href="/?author={{object.author.pk}}&category=&name=&o=">{{object.author}}</a>
+<p>{% trans "Категория : " %}<a href="/?author=&category={{object.category.pk}}&name=&o=">{{object.category}}</a></p>
+<p>{% trans "Автор : " %}<a href="/?author={{object.author.pk}}&category=&name=&o=">{{object.author}}</a></p>
 <p class="card-text">{{object.content|safe }}</p>
 
      {% for img in object.image_set.all %}
@@ -31,9 +30,7 @@
 
 
 <p>{{object.rec}}</p>
-<br>
 <p>{{object.rating}}</p>
-<br>
 <p>{{object.comments_count}}</p>
 <p>{{object.likes_count}}</p>
 <p>{{object.date_created}}</p>
@@ -44,17 +41,17 @@
 {% if user.is_authenticated %}
     {% if Fav == True %}
 
-    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart"></i> Удалить из избранного</a>
+    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart"></i>{% trans "Удалить из избранного" %} </a>
 
     {%else%}
-    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i> В избранное</a>
+    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i>{% trans "В избранное" %}</a>
     {%endif%}
 
     {% if Sub == True %}
-    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Отписаться</a>
+    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">{% trans "Отписаться" %}</a>
     {%else%}
 
-    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Подписаться</a>
+    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">{% trans "Подписаться" %}</a>
     {%endif%}
 {%endif%}
 
@@ -85,7 +82,7 @@
     {{ comment_form }}
 
 
-    <p><button type="submit">Сохранить</button></p>
+    <p><button type="submit">{% trans "Сохранить" %}</button></p>
 </form>
 {{object_list.count}}
    {% for c in object_list %}

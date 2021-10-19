@@ -1,11 +1,12 @@
 {% extends "base_generic.html" %}
-{% block title %}<title>Список постов</title>{% endblock %}
+{% load i18n %}
+{% block title %}<title>{% trans "Список постов" %}</title>{% endblock %}
 {% block content %}
 <form method="get">
         {{ filter.form.as_p }}
         <input type="submit" value="Поиск"/>
      </form>
-    <h1 style="padding: 10px 507px;">Список постов</h1>
+    <h1 style="padding: 10px 507px;">{% trans "Список постов" %}</h1>
 
     {% if article_list %}
     <ul>

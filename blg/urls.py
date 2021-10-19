@@ -43,7 +43,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 urlpatterns += i18n_patterns(
-
+ #TODO: объеденить аккаунты
     path('admin/', admin.site.urls),
     path('', include('apps.blogapp.urls')),
     path('profile/', include('apps.accounts.urls')),

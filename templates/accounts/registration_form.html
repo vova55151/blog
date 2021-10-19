@@ -1,8 +1,8 @@
 {% extends 'base_generic.html' %}
-
+{% load i18n %}
 
 {% block content %}
-<h1>Форма регистрации</h1>
+<h1>{% trans "Форма регистрации" %}</h1>
 
 <div class="row">
     <div class="col-md-4">
@@ -13,10 +13,10 @@
                 onclick="if (password1.type == 'text') (password1.type = 'password')
                 if (password2.type == 'text') (password2.type = 'password')
                 ;else (password1.type = 'text') (password2.type = 'text')">
-                <label class="form-check-label">Показать пароль</label>
+                <label class="form-check-label">{% trans "Показать пароль" %}</label>
             </div>
 
-        <button type="submit" class="btn btn-primary"> Регистрация</button>
+        <button type="submit" class="btn btn-primary">{% trans "Регистрация" %}</button>
         </form>
     </div>
 </div>
