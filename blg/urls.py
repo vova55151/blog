@@ -45,7 +45,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
 
     path('admin/', admin.site.urls),
-    path('blog/', include('apps.blogapp.urls')),
+    path('', include('apps.blogapp.urls')),
     path('profile/', include('apps.accounts.urls')),
     path('accounts/register/', UserRegistrationView.as_view(), name='django_registration_register'),
     path('accounts/activate/complete/', SuccessRegistrationView.as_view(), name='django_registration_activated'),

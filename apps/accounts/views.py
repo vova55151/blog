@@ -136,10 +136,6 @@ class SubList(LoginRequiredMixin, ListView):
     template_name = 'accounts/sub_list.html'
     paginate_by = 10
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
     def get_queryset(self):
         return get_user_model().objects.filter(subscribers=self.request.user)
 
@@ -148,10 +144,6 @@ class FavList(LoginRequiredMixin, ListView):
     model = Article
     template_name = 'accounts/favourite_list.html'
     paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
 
     def get_queryset(self):
         return Article.objects.filter(favourites=self.request.user)

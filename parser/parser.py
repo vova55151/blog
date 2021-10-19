@@ -47,7 +47,8 @@ def sportexpress():
                     print(f"Краткое описание : {descr}")
                     author = main_div.find('div', attrs={'class': 'by-author__author-title'})
                     content = main_div.find('div', attrs={'class': 'js-swiptable-holder'})
-                    print(str(content.text).strip('\n '))
+                    a = content.text.strip("\n")
+                    print(f'Контент : {a}')
                     if author:
                         print(f"Автор : {author.text}")
                     content2 = content.find_all('p')
@@ -55,21 +56,7 @@ def sportexpress():
                     for i in content2:
                         content3.append(i.text)
                     img = main_div.find('img', id='slideshow_1_is_main')['src']
-                    #urllib.request.urlretrieve(img, counter)
-                    response = requests.get(img)
-                    while True:
-                        try:
-                            with open(f'parsed_img/{img}', 'wb') as file:
-                                file.write(response.content)
-                            break
-                        except NotADirectoryError as e:
-                            e.strerror = (
-                                'Cannot create the "images" directory, a file with the same name already exists.\n'
-                                'Delete or rename it and run the script again.\nCannot write file')
-                            raise e
-                        except FileNotFoundError:
-                            os.mkdir('parsed_img')
-                            continue
+                    urllib.request.urlretrieve(img, f'/home/proj/blog/parser/img')
 
                     counter += 1
                     if counter > 2:
@@ -83,12 +70,6 @@ def sportexpress():
             errors.append({'url': url, 'title': "Page do not response"})
 
     return jobs, errors
-
-
-def write_file(self):
-    """Write books info in a json file books.json."""
-    with open('books.json', 'w', encoding='UTF-8') as file:
-        json.dump(self.books_info(), file, indent=4, ensure_ascii=False)
 
 
 sportexpress()

@@ -1,10 +1,10 @@
 {% extends 'base_generic.html' %}
-
+{% load i18n %}
 
 {% block content %}
 
 
-<h1>Форма входа</h1>
+<h1>{% trans "Форма входа" %}</h1>
 <div class="row">
     <div class="col-md-4">
         <form action="" method="post"> {% csrf_token %}
@@ -12,10 +12,10 @@
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input"
                 onclick="if (password.type == 'text') password.type = 'password';else password.type = 'text';">
-                <label class="form-check-label">Показать пароль</label>
+                <label class="form-check-label">{% trans "Показать пароль" %}</label>
             </div>
-            <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
-        <button type="submit" class="btn btn-primary"> Войти</button>
+            <p><a href="{% url 'password_reset' %}"></a></p>
+        <button type="submit" class="btn btn-primary">{% trans "Войти" %} </button>
         </form>
     </div>
 </div>

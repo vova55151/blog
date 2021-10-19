@@ -10,51 +10,54 @@
     {% breadcrumb "Статья" "blogapp:detail" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
- {% if article.preview %}
+ {% if object.preview %}
 
-<img src="{{article.preview.url}}" width="500" height="400">
+<img src="{{object.preview.url}}" width="500" height="400">
 {%endif%}
-<p>{{article.name}}</p>
+<p>{{object.name}}</p>
 
-<p>{{article.descr}}</p>
-<a href="/blog/?author=&category={{article.category.pk}}&name=&o=">{{article.category}}</a>
+<p>{{object.descr}}</p>
+<a href="/?author=&category={{object.category.pk}}&name=&o=">{{object.category}}</a>
 <br>
-<a href="/blog/?author={{article.author.pk}}&category=&name=&o=">{{article.author}}</a>
-<p class="card-text">{{article.content|safe }}</p>
-  {% for img in article.image_set.all %}
+<a href="/?author={{object.author.pk}}&category=&name=&o=">{{object.author}}</a>
+<p class="card-text">{{object.content|safe }}</p>
 
-          <img src="{{img.img.url}}" alt="{{img.alt}}" width="500" height="400">
+     {% for img in object.image_set.all %}
+            {% if img %}
+              <img src="{{img.image_url}}" alt="{{img.alt}}" width="500" height="400">
+            {% endif %}
+     {% endfor %}
 
-      {% endfor %}
 
-<p>{{article.rec}}</p>
+
+<p>{{object.rec}}</p>
 <br>
-<p>{{article.rating}}</p>
+<p>{{object.rating}}</p>
 <br>
-<p>{{article.comments_count}}</p>
-<p>{{article.likes_count}}</p>
-<p>{{article.date_created}}</p>
+<p>{{object.comments_count}}</p>
+<p>{{object.likes_count}}</p>
+<p>{{object.date_created}}</p>
 
-<p>{{article.date_edit}}</p>
-
+<p>{{object.date_edit}}</p>
 
 
 {% if user.is_authenticated %}
     {% if Fav == True %}
 
-    <a href="{% url 'accounts:favourite_add' article.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart"></i> Удалить из избранного</a>
+    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart"></i> Удалить из избранного</a>
 
     {%else%}
-    <a href="{% url 'accounts:favourite_add' article.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i> В избранное</a>
+    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i> В избранное</a>
     {%endif%}
 
     {% if Sub == True %}
-    <a href="{% url 'accounts:subscribers_add' article.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Отписаться</a>
+    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Отписаться</a>
     {%else%}
 
-    <a href="{% url 'accounts:subscribers_add' article.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Подписаться</a>
+    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">Подписаться</a>
     {%endif%}
 {%endif%}
+
 <br>
 <br>
 {% for art in recommended %}
@@ -77,15 +80,15 @@
 
 <br>
 <br>
-<form method="post" action=".">
+<form method="post" action= "{% url 'blogapp:comment' object.id %}">
     {%  csrf_token %}
     {{ comment_form }}
 
 
     <p><button type="submit">Сохранить</button></p>
 </form>
-{{comments.count}}
-   {% for c in comments %}
+{{object_list.count}}
+   {% for c in object_list %}
 <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 
         <div> <p class="card-text">{{c.text|striptags|safe }}</p>

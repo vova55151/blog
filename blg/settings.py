@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django_registration',
     'debug_toolbar',
     'django_bootstrap_breadcrumbs',
+    'adminsortable2',
     'treebeard',
     'rest_framework',
     'ckeditor',
@@ -157,7 +158,7 @@ INTERNAL_IPS = [
 ]
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-#TODO : работает
+# #TODO : работает
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # SENDGRID_API_KEY = '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'
 # EMAIL_HOST = 'smtp.sendgrid.net'

@@ -12,7 +12,7 @@ urlpatterns = [
     path('fav/<str:slug>/', FavouritesAddView.as_view(), name='favourite_add'),
     path('fav/', FavList.as_view(), name='favourite_list'),
     path('', UserArticleList.as_view(), name='profile'),
-    path('update/', UserUpdateView.as_view(), name='profile-update'),
+    path('edit/', UserUpdateView.as_view(), name='profile-update'),
     path('pass_update/', PasswordView.as_view(),
          name='pass-update'),
     # path('<int:pk>/delete', ProfileDelete.as_view(), name='profile_delete'),

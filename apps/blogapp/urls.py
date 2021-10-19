@@ -7,6 +7,7 @@ app_name = 'blogapp'
 urlpatterns = [
     path('', ArticleListView.as_view(model=Article), name='home'),
     path('create/', ArticleCreateView.as_view(),name='create'),
+    path('comment/<int:pk>/', CommentCreateView.as_view(),name='comment'),
     path('<str:slug>/', include([
 
         path('update/', ArticleUpdateView.as_view(), name='update'),

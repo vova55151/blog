@@ -39,7 +39,7 @@ class Category(MP_Node):
         """
         Возвращает юрл главной страницы с фильтром категории
         """
-        return f"/blog/?author=&category={self.pk}&name=&o="
+        return f"/?author=&category={self.pk}&name=&o="
 
 
 class Article(models.Model):
@@ -61,6 +61,10 @@ class Article(models.Model):
     likes_count = models.IntegerField(default=0, verbose_name=ugettext_lazy('Количество лайков'))
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=ugettext_lazy('Дата создания'))
     date_edit = models.DateTimeField(auto_now=True, verbose_name=ugettext_lazy('Дата обновления'))
+    my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta(object):
+        ordering = ['my_order']
 
     def __str__(self):
         return self.name
@@ -84,10 +88,20 @@ class Image(models.Model):
     """
     Модель картинки поста
     """
-    img = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Дополнительные фото'), default=None)
+    img = models.ImageField(verbose_name=ugettext_lazy('Дополнительные фото'), default=None)
     alt = models.CharField(max_length=255, verbose_name=ugettext_lazy('Краткое описание'))
     article = models.ForeignKey(to=Article, verbose_name=ugettext_lazy('Статья'), on_delete=models.SET_NULL,
                                 null=True)
+
+    my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta(object):
+        ordering = ['my_order']
+
+    @property
+    def image_url(self):
+        if self.img and hasattr(self.img, 'url'):
+            return self.img.url
 
 
 class Comment(models.Model):
@@ -137,7 +151,6 @@ class Comment(models.Model):
             self.article.comments_count = Comment.objects.all().filter(article=self.article, status="P").count()
             self.article.save()
         super().save()
-
 
 # class TextPage(models.Model):
 #     """
