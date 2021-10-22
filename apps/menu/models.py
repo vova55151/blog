@@ -1,23 +1,46 @@
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
+from django.urls import reverse
+from django.utils.translation import ugettext_lazy
 
-
-# Create your models here.
-from treebeard.mp_tree import MP_Node
+from blg.utils import from_cyrillic_to_eng
+from const import targets, posl
 
 
 class Menu(models.Model):
-    name = models.CharField(max_length=100, verbose_name='Название')
-    url = models.CharField(max_length=200, verbose_name='URL')
-    targets = [
+    name = models.CharField(max_length=100, verbose_name=ugettext_lazy('Название'))
+    url = models.CharField(max_length=200, verbose_name=ugettext_lazy('URL'))
 
-        ('_blank', '_blank'),
-        ('_self', '_self')
-    ]
-    target = models.CharField(choices=targets, max_length=20, verbose_name='Target',
+    target = models.CharField(choices=targets, max_length=20, verbose_name=ugettext_lazy('Target'),
                               default="_self")
-    posl = [
-        ('H', 'Header'),
-        ('F', 'Footer')
-    ]
-    pos = models.CharField(choices=posl, max_length=20, verbose_name='Позиция меню')
+    pos = models.CharField(choices=posl, max_length=20, verbose_name=ugettext_lazy('Позиция меню'))
+    show = models.BooleanField(verbose_name=ugettext_lazy('Отображать'),
+                               choices=((False, ugettext_lazy('Отображать')), (True, ugettext_lazy('Не отображать'))))
+    my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
 
+    class Meta(object):
+        ordering = ['my_order']
+
+
+class TextPage(models.Model):
+    title = models.CharField(verbose_name=ugettext_lazy('Заголовок'), max_length=50)
+    slug = models.SlugField(verbose_name=ugettext_lazy('slug'), blank=True)
+    content = RichTextUploadingField(verbose_name=ugettext_lazy('Контент'))
+    status = models.BooleanField(verbose_name=ugettext_lazy('Статус'), choices=((False, 'Draft'), (True, 'Published')),
+                                 default=True, null=True, blank=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_edit = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        """
+        Добавляет слаг
+        """
+        if not self.slug:
+            self.slug = from_cyrillic_to_eng(str(self.name))
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('blog:text_page', kwargs={'slug': self.slug})

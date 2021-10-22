@@ -14,10 +14,10 @@ import smtplib
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import ugettext_lazy as _
 from sendgrid import SendGridAPIClient
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'modeltranslation',
     'django_registration',
     'debug_toolbar',
     'django_bootstrap_breadcrumbs',
@@ -59,17 +60,13 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-LANGUAGES = (
-    ('uk', ugettext_lazy('Ukrainian')),
-    ('ru', ugettext_lazy('Russian')),
-)
 
 
 ROOT_URLCONF = 'blg.urls'
@@ -81,11 +78,12 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-
+                'django.template.context_processors.i18n',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
             ],
             'libraries': {
                 'menu_tags': 'apps.menu.templatetags.menu_tags',
@@ -128,7 +126,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru-ru'
+LANGUAGE_CODE = 'ru'
+
+gettext = lambda s: s
+LANGUAGES = (
+    ('uk', _('Ukrainian')),
+    ('ru', _('Russian')),
+)
 
 TIME_ZONE = 'Europe/Kiev'
 
@@ -149,22 +153,23 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-LOCALE_PATH = (
-    os.path.join(BASE_DIR, 'locale')
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale/'),
 )
+
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# TODO : разделить настрйоки
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-SENDGRID_API_KEY = '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'
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'wc.for.sendgrid@gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# SENDGRID_API_KEY = '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'
+# EMAIL_HOST = 'smtp.sendgrid.net'
+# EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
+# EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = 'wc.for.sendgrid@gmail.com'
 
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'

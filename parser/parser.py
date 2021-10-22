@@ -21,55 +21,71 @@ headers = [
 
 
 # TODO : python-slugify django-unique-slugify
-def sportexpress():
+# TODO : rosetta
+# TODO : https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/
+def parse():
     jobs = []
     errors = []
-    domain = 'https://www.sport-express.ru'
-    url = 'https://www.sport-express.ru/reviews/'
-    if url:
+    domain = 'https://www.championat.com'
+    data = []
+    counter = 0
+    for page in range(100, 0, -1):
+        url = f'https://www.championat.com/articles/{page}.html'
         resp = requests.get(url, headers=headers[randint(0, 2)])
         if resp.status_code == 200:
             soup = BS(resp.content, 'lxml')
-            main_div = soup.find('div', attrs={'class': 'se-press-list-page__items'})
-
+            main_div = soup.find('div', attrs={'class': 'article-preview-list'})
             if main_div:
-                counter = 0
-                divl = main_div.find_all('div', attrs={'class': 'se-press-list-page__item'})
+                divl = main_div.find_all('div', attrs={'class': 'article-preview__info'})
                 for div in divl:
-                    href = div.a['href']
-                    resp = requests.get(href, headers=headers[randint(0, 2)])
-                    soup = BS(resp.content, 'lxml')
-                    main_div = soup.find('div', attrs={'class': 'publication-content'})
-                    name = main_div.find('h1', attrs={'class': 'publication-title title-h1 mh_auto'}).text
-                    descr = main_div.find('div', attrs={'class': 'w610_text vrez'}).text
-                    # descr = descr1.p.span.text
-                    print(f"Название статьи : {name}")
-                    print(f"Краткое описание : {descr}")
-                    author = main_div.find('div', attrs={'class': 'by-author__author-title'})
-                    content = main_div.find('div', attrs={'class': 'js-swiptable-holder'})
-                    a = content.text.strip("\n")
-                    print(f'Контент : {a}')
-                    if author:
-                        print(f"Автор : {author.text}")
-                    content2 = content.find_all('p')
-                    content3 = []
-                    for i in content2:
-                        content3.append(i.text)
-                    img = main_div.find('img', id='slideshow_1_is_main')['src']
-                    urllib.request.urlretrieve(img, f'/home/proj/blog/parser/img')
+                    try:
+                        href = div.a['href']
+                        href = domain + href
+                        category = div.find('div', attrs={'class': 'article-preview__details'}).a.text
+                        print(href)
+                        resp = requests.get(href, headers=headers[randint(0, 2)])
+                        soup = BS(resp.content, 'lxml')
+                        page_main = soup.find('div', attrs={'class': 'page-main'})
+                        date_created = page_main.find('div', attrs={'class': 'article-head__details'}).find('time').text
+                        name = page_main.find('div', attrs={'class': 'article-head__title'}).text
+                        # with open('data.json', 'r') as data:
+                        #
+                        #     dataset = json.load(data)
+                        #     print(dataset)
+                        #     for lst in dataset:
+                        #         print(lst[0])
+                        #         if name in lst[0]['name']:
+                        #             print('работает')
+                        #             break
 
-                    counter += 1
-                    if counter > 2:
-                        break
+                        descr = page_main.find('div', attrs={'class': 'article-head__subtitle'}).text
+                        content_p = page_main.find_all('p')
+                        content = []
+                        for i in content_p:
+                            content.append(i.text)
+                        content = ' '.join(content)
+
+                        img = page_main.find('div', attrs={'class': 'article-head__photo'}).img['src']
+                        img2 = page_main.find('div', attrs={'class': 'content-photo'}).img['src']
+                        image_name = img.rpartition('/')[2]
+                        image_name2 = img2.rpartition('/')[2]
+                        urllib.request.urlretrieve(img, f'/home/wcpc/proj/blog/media/{image_name}')
+                        urllib.request.urlretrieve(img2, f'/home/wcpc/proj/blog/media/{image_name2}')
+                        data.append(
+                            [
+                                {'name': name},
+                                {'descr': descr},
+                                {'category': category},
+                                {'content': content},
+                                {'img': image_name},
+                                {'img2': image_name2},
+                                {'date_created': date_created}
+                            ]
+                        )
+                    except Exception as e:
+                        pass
+    with open('data.json', 'a') as file:
+        json.dump(data, file, ensure_ascii=False, indent=2)
 
 
-
-            else:
-                errors.append({'url': url, 'title': "Div does not exists"})
-        else:
-            errors.append({'url': url, 'title': "Page do not response"})
-
-    return jobs, errors
-
-
-sportexpress()
+parse()

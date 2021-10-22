@@ -1,7 +1,7 @@
 from django.urls import path
 
 from apps.accounts.views import *
-from apps.blogapp.views import UserArticleList, UserUpdateView, PasswordView
+from apps.blogapp.views import UserArticleList, UserUpdateView, PasswordView, RunTaskParse
 from django.contrib.auth import views as auth_view
 
 app_name = 'accounts'
@@ -13,6 +13,7 @@ urlpatterns = [
     path('fav/', FavList.as_view(), name='favourite_list'),
     path('', UserArticleList.as_view(), name='profile'),
     path('edit/', UserUpdateView.as_view(), name='profile-update'),
+    path('parse/', RunTaskParse.as_view(), name='parse'),
     path('pass_update/', PasswordView.as_view(),
          name='pass-update'),
     # path('<int:pk>/delete', ProfileDelete.as_view(), name='profile_delete'),

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
+    {% load i18n %}
     {% block title %}{% endblock %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,7 +20,7 @@
 {%load menu_tags%}
 {% headermenu request as header %}
 {% footerermenu request as footer %}
-{%load i18n%}
+
 
 <li>
     <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
@@ -52,14 +52,14 @@
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item {% if request.path == blogapp_home_url%}active {% endif %}	">
-                <a class="nav-link" href="{% url 'blogapp:home'%}">Блог </a>
+                <a class="nav-link" href="{% url 'blogapp:home'%}">{% trans "Блог" %} </a>
             </li>
             <li class="nav-item {% if request.path == blogapp_home_ur%}active {% endif %}">
-                <a class="nav-link" href="{% url 'blogapp:create'%}">Создать статью</a>
+                <a class="nav-link" href="{% url 'blogapp:create'%}">{% trans "Создать статью" %}</a>
             </li>
             <li class="nav-item
            {% if request.path == blogapp_home_ur%} active {% endif %}">
-                <a class="nav-link" href="{% url 'accounts:favourite_list'%}">Список избранного</a>
+                <a class="nav-link" href="{% url 'accounts:favourite_list'%}">{% trans "Список избранного" %}</a>
             </li>
 
             {% for menu in header %}
@@ -76,12 +76,12 @@
             ">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Аккаунт
+                    {% trans "Аккаунт" %}
                 </a>
 
                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" href="{% url 'accounts:profile'%}">Личный кабинет</a>
-                    <a class="dropdown-item" href="{% url 'accounts:subscribers_list'%}?next={{request.get_full_path}}">Подписки</a>
+                    <a class="dropdown-item" href="{% url 'accounts:profile'%}">{% trans "Личный кабинет" %}</a>
+                    <a class="dropdown-item" href="{% url 'accounts:subscribers_list'%}?next={{request.get_full_path}}">{% trans "Подписки" %}</a>
                 </div>
 
             </li>
@@ -92,14 +92,14 @@
             {% endif %}
             {% if user.is_authenticated%}
             <li class="nav-item ">
-                <a class="nav-link" href="{% url 'accounts:logout'%}">Выйти</a>
+                <a class="nav-link" href="{% url 'accounts:logout'%}">{% trans "Выйти" %}</a>
             </li>
             {% else %}
             <li class="nav-item ">
-                <a class="nav-link" href="{% url 'accounts:login'%}?next={{request.get_full_path}}">Войти</a>
+                <a class="nav-link" href="{% url 'accounts:login'%}?next={{request.get_full_path}}">{% trans "Войти" %}</a>
             </li>
             <li class="nav-item ">
-                <a class="nav-link" href="{% url 'django_registration_register'%}?next={{request.get_full_path}}">Регистрация</a>
+                <a class="nav-link" href="{% url 'django_registration_register'%}?next={{request.get_full_path}}">{% trans "Регистрация" %}</a>
             </li>
             {% endif %}
 

@@ -1,13 +1,16 @@
 {% extends "base_generic.html" %}
-{%load i18n%}
-{% block title %}<title>Статья</title>{% endblock %}
+{% load i18n %}
+{% block title %}<title>{% trans "Статья" %}</title>{% endblock %}
 
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
+{% trans "Блог" as tstring%}
+{% trans "Статья" as tstring2%}
+
 {% block breadcrumbs %}
-    {% breadcrumb "Блог" "blogapp:home" %}
+    {% breadcrumb tstring "blogapp:home" %}
     {% breadcrumb object.category object.category.get_absolute_url %}
-    {% breadcrumb "Статья" "blogapp:detail" article.slug %}
+    {% breadcrumb tstring2 "blogapp:detail" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
  {% if object.preview %}
@@ -27,15 +30,12 @@
             {% endif %}
      {% endfor %}
 
+<p>{% trans "Средний рейтинг" %} : {{object.rating}}</p>
+<p>{% trans "Количество комментариев" %} : {{object.comments_count}}</p>
+<p>{% trans "Количество лайков" %} : {{object.likes_count}}</p>
+<p>{% trans "Дата создания" %} : {{object.date_created}}</p>
 
-
-<p>{{object.rec}}</p>
-<p>{{object.rating}}</p>
-<p>{{object.comments_count}}</p>
-<p>{{object.likes_count}}</p>
-<p>{{object.date_created}}</p>
-
-<p>{{object.date_edit}}</p>
+<p>{% trans "Дата изменения" %} : {{object.date_edit}}</p>
 
 
 {% if user.is_authenticated %}
@@ -53,10 +53,14 @@
 
     <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">{% trans "Подписаться" %}</a>
     {%endif%}
+{% else %}
+    <a href="{% url 'accounts:login'%}?next={{request.get_full_path}}" class="btn btn-outline-primary">{% trans "Войти" %}</a>
+
 {%endif%}
 
 <br>
 <br>
+{% trans 'Рекомендуемые статьи' %}
 {% for art in recommended %}
 
        <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
@@ -84,7 +88,6 @@
 
     <p><button type="submit">{% trans "Сохранить" %}</button></p>
 </form>
-{{object_list.count}}
    {% for c in object_list %}
 <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 

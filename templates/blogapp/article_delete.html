@@ -1,16 +1,19 @@
 
 {% extends "base_generic.html" %}
 {% load i18n %}
+{% block title %}<title>{% trans "Удаление статьи" %}</title>{% endblock %}
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
+{% trans "Блог" as tstring%}
+{% trans "Удаление статьи" as tstring2%}
 {% block breadcrumbs %}
-    {% breadcrumb "Блог" "blogapp:home" %}
-    {% breadcrumb "Удаление статьи" "blogapp:delete" article.slug %}
+    {% breadcrumb tstring "blogapp:home" %}
+    {% breadcrumb tstring2 "blogapp:delete" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
 {% block content %}
 
-<h1>{% trans "Удалить проект" %}</h1>
+<h1>{% trans "Удалить статью" %}</h1>
 
 <p>{% trans "Вы уверены,что хотите удалить статью: " %}{{ object }}?</p>
 

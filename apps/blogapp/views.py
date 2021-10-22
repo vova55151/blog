@@ -1,5 +1,6 @@
 # Create your views here.
 import statistics
+import uuid
 
 import django_filters
 from django.contrib.auth.forms import PasswordChangeForm
@@ -10,6 +11,7 @@ from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import DetailView, CreateView, ListView, UpdateView, DeleteView
 from django.views.generic.list import MultipleObjectMixin
 from django_filters import OrderingFilter
@@ -17,7 +19,7 @@ from django_filters.views import FilterView
 from apps.accounts.forms import UserModelForm
 from apps.blogapp.forms import *
 from apps.blogapp.models import *
-from apps.blogapp.task import send_email
+from apps.blogapp.task import send_email, load_from_json
 
 
 class Filter(django_filters.FilterSet):
@@ -76,12 +78,17 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
         return reverse_lazy('blogapp:detail', kwargs={'slug': self.get_object().slug})
 
     def get_context_data(self, **kwargs):
+        """
+        Проверка на подписку и избранное
+        :param kwargs:
+        :return : context
+        """
         object_list = Comment.objects.filter(article=self.object, status='P')
         context = super().get_context_data(object_list=object_list, **kwargs)
         object = self.get_object()
         if self.request.user.is_authenticated:
             if get_user_model().objects.get(pk=object.author.pk).subscribers.filter(
-                    pk=self.request.user.pk).exists():
+                    pk=self.request.user.pk).exists():  # TODO: вынести,передать реквест и юзера
                 context["Sub"] = True
             else:
                 context["Sub"] = False
@@ -89,10 +96,17 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
                 context["Fav"] = True
             else:
                 context["Fav"] = False
-        context['recommended'] = Article.objects.filter(category=object.category).exclude(id=object.id)[0:5]
+        context['recommended'] = self.object.recommended.all()
+        # Article.objects.filter(category=object.category).exclude(id=object.id)[0:5]
         context['comment_form'] = CommentModelForm()
 
         return context
+
+
+class RunTaskParse(LoginRequiredMixin, View):
+    def get(self, request, **kwargs):
+        load_from_json(self.request.user)
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
@@ -100,7 +114,10 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     form_class = CommentModelForm
     template_name = 'blogapp/comment_create.html'
 
-    def get_object(self):
+    def get_object(self) -> Article:
+        """
+        :return: Article
+        """
         return super().get_object(
             queryset=Article.objects.all()
         )
@@ -188,49 +205,17 @@ class ArticleUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['form'] = ArticleModelForm(self.request.POST)
-            context['img_inline'] = Img_inline(self.request.POST)
-
-        else:
-            context['form'] = ArticleModelForm(instance=self.object)
-            context['img_inline'] = Img_inline(instance=self.object)
+        context['img_inline'] = Img_inline(self.request.POST or None, self.request.FILES or None, instance=self.object)
         return context
 
-    def post(self, request, *args, **kwargs):
-        """
-        Обрабатывает запросы POST, создавая экземпляр формы и его встроенные наборы форм с переданными переменными POST
-         Возвращает методы валидации формы
-        """
-        self.object = None
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        img_inline = Img_inline(self.request.POST, self.request.FILES, instance=form.instance)
-        if form.is_valid() and img_inline.is_valid():
-
-            return self.form_valid(form, img_inline)
-        else:
-            return self.form_invalid(form, img_inline)
-
-    def form_invalid(self, form, img_inline):
-        return self.render_to_response(self.get_context_data(form=form, img_inline=img_inline))
-    #TODO : кнопка" подробнее " 2.2.2.1 пункт
-    def form_valid(self, form, img_inline):
-        """
-        Присваивает посту автора и рассылает имейлы его подписчикам
-        """
-        context = self.get_context_data()
-        _form = context['form']
-        img_inline = context['img_inline']
-        if form.is_valid() and img_inline.is_valid():
-            self.object = form.save()
-            _form.instance = self.object
-            _form.save()
-            img_inline.instance = self.object
+    def form_valid(self, form):
+        img_inline = Img_inline(self.request.POST or None, self.request.FILES or None, instance=self.object)
+        if img_inline.is_valid():
+            response = super().form_valid(form)
             img_inline.save()
-            return HttpResponseRedirect(self.get_success_url())
+            return response
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse_lazy('blogapp:update', kwargs={'slug': self.get_object().slug})

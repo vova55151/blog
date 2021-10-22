@@ -1,10 +1,13 @@
 {% extends "base_generic.html" %}
 {% load i18n %}
+{% block title %}<title>{% trans "Создание статьи" %}</title>{% endblock %}
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
+{% trans "Блог" as tstring%}
+{% trans "Создание статьи" as tstring2%}
 {% block breadcrumbs %}
-    {% breadcrumb "Блог" "blogapp:home" %}
-    {% breadcrumb "Создание статьи" "blogapp:create" article.slug %}
+    {% breadcrumb tstring "blogapp:home" %}
+    {% breadcrumb tstring2 "blogapp:create" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
 <h1>{% trans "Создание статьи" %}</h1>

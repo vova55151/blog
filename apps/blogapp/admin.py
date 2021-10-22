@@ -13,6 +13,8 @@ from apps.blogapp.models import Category, Article, Comment, Image
 from apps.menu.models import Menu
 
 
+
+
 class GroupInstanceInline(admin.TabularInline):
     model = Group
 
@@ -59,15 +61,15 @@ admin.site.register(Image)
 class Imginline(SortableInlineAdminMixin, admin.TabularInline):
     model = Image
 
+
 # TODO : django admin sortable 2 что сортировать
 class Commentnline(admin.TabularInline):
     model = Comment
 
 
-
 @admin.register(Article)
 class ArticleAdmin(SortableAdminMixin, admin.ModelAdmin):
-    list_display = ('name', 'slug', 'author', 'category', 'descr', 'content', 'rating',
+    list_display = ('name', 'slug', 'author', 'category', 'descr', 'rating',
                     'comments_count', 'likes_count', 'date_created', 'date_edit')
     inlines = (Imginline, Commentnline)
     prepopulated_fields = {'slug': ('name',)}

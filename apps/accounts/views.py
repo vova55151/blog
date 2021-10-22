@@ -30,6 +30,7 @@ from apps.blogapp.models import Article
 #         post.favourites.add(request.user)
 #     post.save()
 #     return HttpResponseRedirect(request.META['HTTP_REFERER'])
+from apps.blogapp.task import load_from_json
 
 
 class FavouritesAddView(LoginRequiredMixin, View):

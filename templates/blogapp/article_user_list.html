@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 {% load i18n%}
-{% block title %}<title>{% trans "Список постов" %}</title>{% endblock %}
+{% block title %}<title>{% trans "Личный кабинет" %}</title>{% endblock %}
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
 {% trans "Блог" as tstring%}
@@ -10,7 +10,7 @@
     {% breadcrumb tstring2 "accounts:profile" user.pk %}
 {% endblock %}
 {% render_breadcrumbs %}
-
+<h1 style="padding: 10px 507px;">{% trans "Личный кабинет" %}</h1>
 <form action= "{% url 'accounts:profile-update' %}" enctype= multipart/form-data method="POST">
     {% csrf_token %}
     {{user_email}}

@@ -12,11 +12,16 @@ from django.utils.translation import ugettext_lazy
 from treebeard.mp_tree import MP_Node
 
 from blg.utils import from_cyrillic_to_eng
+from const import statusl, ratingl
 
 
 class Category(MP_Node):
     name = models.CharField(max_length=100, verbose_name=ugettext_lazy('Название'))
     slug = models.SlugField(unique=True, verbose_name='Slug', null=True, blank=True)
+    my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta(object):
+        ordering = ['my_order']
 
     def __str__(self):
         if self.depth == 1:
@@ -61,6 +66,8 @@ class Article(models.Model):
     likes_count = models.IntegerField(default=0, verbose_name=ugettext_lazy('Количество лайков'))
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=ugettext_lazy('Дата создания'))
     date_edit = models.DateTimeField(auto_now=True, verbose_name=ugettext_lazy('Дата обновления'))
+    recommended = models.ManyToManyField(blank=True,to='Article', related_name='recommendation',
+                                         verbose_name=ugettext_lazy('Рекомендуемые статьи'))
     my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
 
     class Meta(object):
@@ -100,6 +107,9 @@ class Image(models.Model):
 
     @property
     def image_url(self):
+        """
+        Возвращает юрл картинки,если он существует
+        """
         if self.img and hasattr(self.img, 'url'):
             return self.img.url
 
@@ -113,19 +123,8 @@ class Comment(models.Model):
     article = models.ForeignKey(to=Article, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Статья'),
                                 null=True)
 
-    statusl = (
-        ('D', 'Draft'),#TODO : в отдельный файл
-        ('P', 'Published'),
+    status = models.CharField(choices=statusl, max_length=100, verbose_name=ugettext_lazy('Статус'), default='P')
 
-    )
-    status = models.CharField(choices=statusl, max_length=100, verbose_name=ugettext_lazy('Статус'))
-    ratingl = (
-        ('1', '1'),
-        ('2', '2'),
-        ('3', '3'),
-        ('4', '4'),#TODO : в отдельный файл
-        ('5', '5'),
-    )
     rating = models.CharField(choices=ratingl, max_length=100, verbose_name=ugettext_lazy('Рейтинг'), null=True,
                               blank=True)
     text = RichTextField(verbose_name=ugettext_lazy('Контент'))
@@ -137,14 +136,7 @@ class Comment(models.Model):
         Добавляет слаг,считает кол-во комментариев,средний рейтинг поста
         """
         model_class = self._meta.model
-        # if model_class.objects.filter(author=self.author, article=self.article).exists():
-        #     print(model_class.objects.filter(author=self.author, article=self.article).exists())
-        # print(model_class.objects.filter(author=self.author, article=self.article, status="P").exists())
-
-        #     .annotate(Count('rating'))
-        # self.objects.article.comments_count = count.comment_rating__count
-
-        object_list = model_class.objects.filter(article=self.article, status="P")  # .exclude(author=self.author)
+        object_list = model_class.objects.filter(article=self.article, status="P")
         if object_list:
             self.article.rating = Comment.objects.all().filter(article=self.article, status="P").aggregate(
                 Avg('rating')).get('rating__avg')

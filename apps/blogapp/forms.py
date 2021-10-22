@@ -52,7 +52,7 @@ class CommentModelForm(forms.ModelForm):
 
     class Meta:
         model = Comment
-        fields = ['text', 'status', 'rating']
+        fields = ['text', 'rating']
 
 
 class ImgModelForm(forms.ModelForm):
@@ -69,4 +69,4 @@ Img_inline = inlineformset_factory(Article,
                                    Image,
                                    fields=['img', 'alt', 'article'],
                                    form=ImgModelForm,
-                                   extra=1, )
+                                   extra=3, )

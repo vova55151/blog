@@ -40,7 +40,7 @@ cyrillic_letters = {
 
 
 def from_cyrillic_to_eng(text: str):
-    text = text.replace(' ', '_').replace('(', '_').replace(')', '_').lower()
+    text = text.replace(' ', '_').replace('(', '_').replace(')', '_').replace(':', '_').replace(',', '_').lower()
     tmp = ''
     for ch in text:
         tmp += cyrillic_letters.get(ch, ch)

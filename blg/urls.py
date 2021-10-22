@@ -19,16 +19,14 @@ from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include, re_path
-import django_registration.backends.activation.urls
 from django.views.decorators.cache import never_cache
-from django_registration.backends.activation.views import RegistrationView
-
-from apps.accounts.forms import UserForm
 from apps.accounts.views import SuccessRegistrationView, UserActivationView, UserRegistrationView
+
+from apps.menu.views import TextPageView
 from blg import settings
 from ckeditor_uploader import views
 # TODO: локализация python manage.py makemessages -l 'ru' , python manage.py compilemessages
-import ckeditor_uploader.urls
+
 # TODO : sudo apt-get install gettext
 ckeditor_urls = [
     re_path(r"^upload/", views.upload, name="ckeditor_upload"),
@@ -43,21 +41,27 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 urlpatterns += i18n_patterns(
- #TODO: объеденить аккаунты
     path('admin/', admin.site.urls),
     path('', include('apps.blogapp.urls')),
+    path('rest/', include('apps.rest.urls')),
     path('profile/', include('apps.accounts.urls')),
-    path('accounts/register/', UserRegistrationView.as_view(), name='django_registration_register'),
-    path('accounts/activate/complete/', SuccessRegistrationView.as_view(), name='django_registration_activated'),
-    path('accounts/activate/<str:activation_key>/', UserActivationView.as_view(), name='django_registration_activate'),
-    path('success_registration/', SuccessRegistrationView.as_view(), name='success_registration'),
-    path('accounts/', include('django_registration.backends.activation.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('page/<slug:slug>/', TextPageView.as_view(), name='text_page'),
+    path('accounts/', include([
+        path('register/', UserRegistrationView.as_view(), name='django_registration_register'),
+        path('activate/complete/', SuccessRegistrationView.as_view(), name='django_registration_activated'),
+        path('activate/<str:activation_key>/', UserActivationView.as_view(),
+             name='django_registration_activate'),
+        path('success_registration/', SuccessRegistrationView.as_view(), name='success_registration'),
+        path('', include('django_registration.backends.activation.urls')),
+        path('', include('django.contrib.auth.urls')),
+    ])),
 )
+
 if settings.DEBUG:
     import debug_toolbar
+
     urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns
+                      path('__debug__/', include(debug_toolbar.urls)),
+                  ] + urlpatterns
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,10 +1,13 @@
 {% extends "base_generic.html" %}
 {% load i18n %}
+{% block title %}<title>{% trans "Подписки" %}</title>{% endblock %}
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
+{% trans "Блог" as tstring%}
+{% trans "Список подписок" as tstring2%}
 {% block breadcrumbs %}
-    {% breadcrumb "Блог" "blogapp:home" %}
-    {% breadcrumb "Список подписок" "blogapp:create" article.slug %}
+    {% breadcrumb tstring "blogapp:home" %}
+    {% breadcrumb tstring2 "blogapp:create" article.slug %}
 {% endblock %}
 {% render_breadcrumbs %}
 {% for usr in object_list %}

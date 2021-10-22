@@ -1,12 +1,13 @@
 {% extends "base_generic.html" %}
-{%load i18n %}
+{% load i18n %}
+{% block title %}<title>{% trans "Список избранного" %}</title>{% endblock %}
 {% block content %}
 {% load django_bootstrap_breadcrumbs %}
 {% trans "Блог" as tstring%}
 {% trans "Список избранного" as tstring2%}
 {% block breadcrumbs %}
     {% breadcrumb tstring "blogapp:home" %}
-    {% breadcrumb tstring2 "subscribers_list"%}
+    {% breadcrumb tstring2 "accounts:subscribers_list"%}
 {% endblock %}
 {% render_breadcrumbs %}
 {% for post in object_list %}

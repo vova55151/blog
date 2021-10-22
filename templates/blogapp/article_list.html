@@ -1,12 +1,13 @@
+
 {% extends "base_generic.html" %}
 {% load i18n %}
-{% block title %}<title>{% trans "Список постов" %}</title>{% endblock %}
+{% block title %}<title>{% translate "Список постов" %}</title>{% endblock %}
 {% block content %}
 <form method="get">
         {{ filter.form.as_p }}
         <input type="submit" value="Поиск"/>
      </form>
-    <h1 style="padding: 10px 507px;">{% trans "Список постов" %}</h1>
+    <h1 style="padding: 10px 507px;">{% translate "Список постов" %}</h1>
 
     {% if article_list %}
     <ul>
@@ -15,20 +16,20 @@
       {% for art in article_list %}
       <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 
-        <div><a style="margin: 77px;" href="{{ art.get_absolute_url }}">{{ art.name }}</a></div>
+        <div style="margin: 50px;"><a href="{{ art.get_absolute_url }}">{{ art.name }}</a>
+            <p>{{art.descr}}</p>
+            <p>{% translate "Рейтинг"  %}: {{art.rating}}</p>
+            <p>{% translate "Дата изменения"  %}: {{art.date_edit}}</p>
+          <div><img src="{{ art.author.get_photo_url }}" style="display: block;max-width: 10%;" class="img-responsive thumbnail " alt="img">
+               <p>{{ art.author }}</p>  </div>
+              <a href="{{ art.get_absolute_url }}" class="btn btn-outline-primary">{% translate "Подробнее" %}</a></div>
 
-             {% if art.preview %}
-            <img src="{{art.preview.url}}" style="margin: 0 auto;display: block;max-width: 80%;">
-            {%endif%}
-
-          <div><img src="{{ art.author.get_photo_url }}" style="margin: 5px 72px;display: block;max-width: 10%;" class="img-responsive thumbnail " alt="img">
-               <p style="margin-left: 72px;">{{ art.author }}</p>  </div>
 
       </li>
       {% endfor %}
 
 
     {% else %}
-      <p>Список постов пуст</p>
+      <p>{% translate "Список постов пуст" %}</p>
     {% endif %}</ul>
 {% endblock %}
