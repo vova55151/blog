@@ -1,6 +1,7 @@
 # Register your models here.
 from adminsortable2.admin import SortableAdminMixin, SortableInlineAdminMixin
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 from django.contrib.auth.models import Group
@@ -11,8 +12,6 @@ from apps.accounts.forms import CustomUserCreationForm, CustomUserChangeForm
 from apps.accounts.models import User
 from apps.blogapp.models import Category, Article, Comment, Image
 from apps.menu.models import Menu
-
-
 
 
 class GroupInstanceInline(admin.TabularInline):
@@ -30,14 +29,16 @@ class CategoryAdmin(TreeAdmin):
     form = movenodeform_factory(Category, CategoryNodeForm)
 
 
-class CustomUserAdmin(SortableAdminMixin, UserAdmin):
+class CustomUserAdmin(SortableAdminMixin, UserAdmin):  # TODO: KeyError: "Key 'email' not found in 'UserForm'. Choices
+    # TODO: are: img, is_active, is_staff, password1, password2, user_permissions."
+
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
-    model = User
+    model = get_user_model()
     list_display = ('email', 'is_staff', 'is_active',)
     list_filter = ('email', 'is_staff', 'is_active',)
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'subscribers')}),
+        (None, {'fields': ('email', 'password',)}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'img', 'user_permissions',)}),
     )
     add_fieldsets = (

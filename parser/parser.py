@@ -7,6 +7,7 @@ import codecs
 from bs4 import BeautifulSoup as BS
 from random import randint
 
+from apps.blogapp.models import Article
 from blg.settings import BASE_DIR
 
 headers = [
@@ -24,23 +25,24 @@ headers = [
 # TODO : rosetta
 # TODO : https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/
 def parse():
-    jobs = []
-    errors = []
+    """
+    Парсит https://www.championat.com
+    :return:
+    """
     domain = 'https://www.championat.com'
     data = []
-    counter = 0
-    for page in range(100, 0, -1):
-        url = f'https://www.championat.com/articles/{page}.html'
+    for page in range(100, 0, -1):  # пагинация
+        url = f'https://www.championat.com/articles/{page}.html'  # url страницы
         resp = requests.get(url, headers=headers[randint(0, 2)])
         if resp.status_code == 200:
             soup = BS(resp.content, 'lxml')
-            main_div = soup.find('div', attrs={'class': 'article-preview-list'})
+            main_div = soup.find('div', attrs={'class': 'article-preview-list'})  # основной div
             if main_div:
                 divl = main_div.find_all('div', attrs={'class': 'article-preview__info'})
                 for div in divl:
                     try:
                         href = div.a['href']
-                        href = domain + href
+                        href = domain + href  # url каждой статьи
                         category = div.find('div', attrs={'class': 'article-preview__details'}).a.text
                         print(href)
                         resp = requests.get(href, headers=headers[randint(0, 2)])
@@ -71,21 +73,21 @@ def parse():
                         image_name2 = img2.rpartition('/')[2]
                         urllib.request.urlretrieve(img, f'/home/wcpc/proj/blog/media/{image_name}')
                         urllib.request.urlretrieve(img2, f'/home/wcpc/proj/blog/media/{image_name2}')
-                        data.append(
-                            [
-                                {'name': name},
-                                {'descr': descr},
-                                {'category': category},
-                                {'content': content},
-                                {'img': image_name},
-                                {'img2': image_name2},
-                                {'date_created': date_created}
-                            ]
-                        )
+                        if Article.objects.filter(name=name).exists():
+                            print('Статья уже существует')
+                        else:
+                            data.append(
+                                [
+                                    {'name': name},
+                                    {'descr': descr},
+                                    {'category': category},
+                                    {'content': content},
+                                    {'img': image_name},
+                                    {'img2': image_name2},
+                                    {'date_created': date_created}
+                                ]
+                            )
                     except Exception as e:
                         pass
     with open('data.json', 'a') as file:
         json.dump(data, file, ensure_ascii=False, indent=2)
-
-
-parse()

@@ -1,0 +1,26 @@
+{% extends "base_generic.html" %}
+{% load i18n %}
+{% block title %}<title>{% trans "Создание статьи" %}</title>{% endblock %}
+{% block content %}
+{% load django_bootstrap_breadcrumbs %}
+{% trans "Блог" as tstring%}
+{% trans "Создание статьи" as tstring2%}
+{% block breadcrumbs %}
+    {% breadcrumb tstring "blogapp:home" %}
+    {% breadcrumb tstring2 "blogapp:create" article.slug %}
+{% endblock %}
+{% render_breadcrumbs %}
+<h1>{% trans "Создание статьи" %}</h1>
+<form action="" enctype= multipart/form-data method="post">
+    {% csrf_token %}
+    <table>
+    {{ form.as_table }}
+        {{img_inline.as_table}}
+    </table>
+
+    <input type="submit" value="Ок" />
+
+</form>
+
+
+{% endblock %}

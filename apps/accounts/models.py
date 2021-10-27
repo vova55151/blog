@@ -16,13 +16,17 @@ class User(AbstractUser):
     """
     username = None
     subscribes = models.ManyToManyField('User', related_name='subscribers')
-    phone = models.CharField(max_length=100, verbose_name='Телефон', blank=True, null=True)
-    email = models.EmailField(ugettext_lazy('email address'), unique=True)
-    img = models.ImageField(blank=True, null=True, verbose_name='Фото профиля')
+    phone = models.CharField(max_length=100, verbose_name=ugettext_lazy('Телефон'), blank=True, null=True)
+    email = models.EmailField(verbose_name=ugettext_lazy('email address'), unique=True)
+    img = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Фото профиля'))
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
+    my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+    class Meta(object):
+        ordering = ['my_order']
 
     def __str__(self):
         """

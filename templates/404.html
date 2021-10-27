@@ -1,0 +1,8 @@
+{% extends "base_generic.html" %}
+{% load i18n %}
+{% block title %}<title>{% trans "404" %}</title>{% endblock %}
+
+{% block content %}
+<h3>К сожалению, по этому запросу ничего не найдено. Попробуйте вернуться на главную и поискать нужную информацию в других разделах.</h3>
+        <div><a href="{% url 'blogapp:home'%}"  class="btn btn-outline-primary">{% trans "На главную" %}</a></div>
+{% endblock %}

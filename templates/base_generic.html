@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     {% load i18n %}
+    {% load static %}
     {% block title %}{% endblock %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,7 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
     <!-- Добавление дополнительного статического CSS файла -->
-    {% load static %}
+
     <script type="text/javascript" src='{% static "ckeditor/ckeditor-init.js" %}'></script>
     <script type="text/javascript" src='{% static "ckeditor/ckeditor/ckeditor.js" %}'></script>
 

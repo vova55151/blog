@@ -1,0 +1,106 @@
+{% extends "base_generic.html" %}
+{% load i18n %}
+{% block title %}<title>{% trans "Статья" %}</title>{% endblock %}
+
+{% block content %}
+{% load django_bootstrap_breadcrumbs %}
+{% trans "Блог" as tstring%}
+{% trans "Статья" as tstring2%}
+
+{% block breadcrumbs %}
+    {% breadcrumb tstring "blogapp:home" %}
+    {% breadcrumb object.category object.category.get_absolute_url %}
+    {% breadcrumb tstring2 "blogapp:detail" article.slug %}
+{% endblock %}
+{% render_breadcrumbs %}
+ {% if object.preview %}
+
+<img src="{{object.preview.url}}" width="500" height="400">
+{%endif%}
+<p>{{object.name}}</p>
+
+<p>{{object.descr}}</p>
+<p>{% trans "Категория : " %}<a href="/?author=&category={{object.category.pk}}&name=&o=">{{object.category}}</a></p>
+<p>{% trans "Автор : " %}<a href="/?author={{object.author.pk}}&category=&name=&o=">{{object.author}}</a></p>
+<p class="card-text">{{object.content|safe }}</p>
+
+     {% for img in object.image_set.all %}
+            {% if img %}
+              <img src="{{img.image_url}}" alt="{{img.alt}}" width="500" height="400">
+            {% endif %}
+     {% endfor %}
+
+<p>{% trans "Средний рейтинг" %} : {{object.rating}}</p>
+<p>{% trans "Количество комментариев" %} : {{object.comments_count}}</p>
+<p>{% trans "Количество лайков" %} : {{object.likes_count}}</p>
+<p>{% trans "Дата создания" %} : {{object.date_created}}</p>
+
+<p>{% trans "Дата изменения" %} : {{object.date_edit}}</p>
+
+
+{% if user.is_authenticated %}
+    {% if Fav == True %}
+
+    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart"></i>{% trans "Удалить из избранного" %} </a>
+
+    {%else%}
+    <a href="{% url 'accounts:favourite_add' object.slug %}?next={{request.get_full_path}}" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i>{% trans "В избранное" %}</a>
+    {%endif%}
+
+    {% if Sub == True %}
+    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">{% trans "Отписаться" %}</a>
+    {%else%}
+
+    <a href="{% url 'accounts:subscribers_add' object.author.pk %}?next={{request.get_full_path}}" class="btn btn-outline-primary">{% trans "Подписаться" %}</a>
+    {%endif%}
+{% else %}
+    <a href="{% url 'accounts:login'%}?next={{request.get_full_path}}" class="btn btn-outline-primary">{% trans "Войти" %}</a>
+
+{%endif%}
+
+<br>
+<br>
+{% trans 'Рекомендуемые статьи' %}
+{% for art in recommended %}
+
+       <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
+
+
+        <div><a href="{{ art.get_absolute_url }}">{{ art.name }}</a></div>
+
+             {% if art.preview %}
+            <img src="{{art.preview.url}}" width="70" height="30">
+            {%endif%}
+
+          <div><img src="{{ art.author.get_photo_url }}" width="30" height="20" class="img-responsive thumbnail " alt="img">
+              <p>{{ art.author }}</p>    </div>
+
+      </li>
+
+      {% endfor %}
+
+<br>
+<br>
+<form method="post" action= "{% url 'blogapp:comment' object.id %}">
+    {%  csrf_token %}
+    {{ comment_form }}
+
+
+    <p><button type="submit">{% trans "Сохранить" %}</button></p>
+</form>
+   {% for c in object_list %}
+<li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
+
+        <div> <p class="card-text">{{c.text|striptags|safe }}</p>
+          <p>{{ c.author }}</p>
+            <p>{{c.date_created}}</p>
+            <p>{{c.rating}}</p>
+
+        </div>
+       </li>
+
+      {% endfor %}
+
+
+
+{% endblock %}

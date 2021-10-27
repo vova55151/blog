@@ -1,59 +1,21 @@
-# Create your views here.
-import statistics
-import uuid
-
-import django_filters
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.mail import send_mail
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import DetailView, CreateView, ListView, UpdateView, DeleteView
 from django.views.generic.list import MultipleObjectMixin
-from django_filters import OrderingFilter
 from django_filters.views import FilterView
 from apps.accounts.forms import UserModelForm
 from apps.blogapp.forms import *
 from apps.blogapp.models import *
 from apps.blogapp.task import send_email, load_from_json
+from filter import Filter
 
-
-class Filter(django_filters.FilterSet):
-    """
-    Настройка фильтра под древовидную структуру категорий поста
-    """
-
-    def filter_by_category(self, queryset=None, value=None):
-        category = value
-        if category.get_descendants():
-            queryset1 = self.filter(category__in=category.get_descendants())
-            queryset2 = self.filter(category__exact=category)
-            queryset = queryset1 | queryset2
-        else:
-            queryset = self.filter(category=category)
-        return queryset
-
-    category = django_filters.ModelChoiceFilter(
-        queryset=Category.objects.all(),
-        method=filter_by_category
-    )
-    name = django_filters.CharFilter(lookup_expr='icontains')
-    o = OrderingFilter(
-        fields=(
-            ('rating', 'rating'),
-            ('author', 'author'),
-            ('category', 'category'),
-            ('date_created', 'date_created'),
-        ),
-    )
-
-    class Meta:
-        model = Article
-        fields = ['author', 'category']
+from parser.parser import parse
 
 
 class ArticleListView(FilterView):
@@ -80,8 +42,6 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
     def get_context_data(self, **kwargs):
         """
         Проверка на подписку и избранное
-        :param kwargs:
-        :return : context
         """
         object_list = Comment.objects.filter(article=self.object, status='P')
         context = super().get_context_data(object_list=object_list, **kwargs)
@@ -105,6 +65,7 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
 
 class RunTaskParse(LoginRequiredMixin, View):
     def get(self, request, **kwargs):
+        parse()
         load_from_json(self.request.user)
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
@@ -123,6 +84,11 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         )
 
     def form_valid(self, form):
+        """
+        Присваивает комментарию автора и статью
+        :param form:
+        :return:
+        """
         comment_form = form.save(commit=False)
         comment_form.author = self.request.user
         comment_form.article = self.get_object()
@@ -152,7 +118,6 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         img_inline = Img_inline()
-
         return self.render_to_response(
             self.get_context_data(form=form,
                                   img_inline=img_inline, ))
@@ -194,7 +159,7 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('blogapp:detail', kwargs={'slug': self.object.slug})
 
 
-class ArticleUpdateView(LoginRequiredMixin, UpdateView):
+class ArticleUpdateView(UserPassesTestMixin, UpdateView):
     """
     Класс для редактирования поста
     """
@@ -204,21 +169,29 @@ class ArticleUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'blogapp/article_update.html'
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         context['img_inline'] = Img_inline(self.request.POST or None, self.request.FILES or None, instance=self.object)
         return context
 
     def form_valid(self, form):
+
         img_inline = Img_inline(self.request.POST or None, self.request.FILES or None, instance=self.object)
         if img_inline.is_valid():
-            response = super().form_valid(form)
             img_inline.save()
-            return response
+            return super().form_valid(form)
         else:
             return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse_lazy('blogapp:update', kwargs={'slug': self.get_object().slug})
+
+    def test_func(self):
+        """
+        Отклоняет реквест с 403 ошибкой,если метод возвращает False
+        """
+        if self.request.user.is_authenticated and self.request.user == self.get_object().author:
+            return True
 
 
 class UserArticleList(LoginRequiredMixin, ListView):
@@ -266,14 +239,26 @@ class UserUpdateView(UpdateView):
         return self.request.user
 
     def form_invalid(self, form):
+        """
+        Отображает ошибки форм
+        :param form:
+        :return:
+        """
         messages.add_message(self.request, messages.ERROR, form.errors)
         return redirect(reverse_lazy('accounts:profile'))
 
 
-class ArticleDeleteView(DeleteView):
+class ArticleDeleteView(UserPassesTestMixin, DeleteView):
     """
     Класс для удаления поста
     """
     model = Article
     success_url = reverse_lazy('blogapp:home')
     template_name = 'blogapp/article_delete.html'
+
+    def test_func(self):
+        """
+        Отклоняет реквест с 403 ошибкой,если метод возвращает False
+        """
+        if self.request.user.is_authenticated and self.request.user == self.get_object().author:
+            return True

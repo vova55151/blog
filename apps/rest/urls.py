@@ -7,12 +7,25 @@ from rest_framework import routers
 app_name = 'rest'
 router = routers.DefaultRouter()
 
-
-
 urlpatterns = [
-    path('api/v1/list', ArticleView.as_view()),
-    path('api/v1/update/<str:slug>', ArticleUpdateView.as_view()),
-    path('api/v1/detail', ArticleDetailView.as_view()),
+    path('api/v1/', include([
+        path('list/', ArticleList.as_view(), name='home'),
+        path('create/', ArticleCreate.as_view(), name='create'),
+        path('profile/', UserDetailView.as_view(), name='user_detail'),
+        path('profile/update/', UserUpdateView.as_view(), name='user_update'),
+        path('<str:slug>/', include([
+
+            path('update/', ArticleUpdate.as_view(), name='update'),
+            path('detail/', ArticleDetail.as_view(), name='detail'),
+            path('delete/', ArticleDelete.as_view(), name='delete'),
+            path('fav/', FavouritesAddView.as_view(), name='favourite'),
+
+        ])),
+        path('<int:pk>/sub/', SubscribersAdd.as_view(), name='subscribe'),
+
+
+    ])),
+
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('', include(router.urls)),
 
@@ -27,4 +40,3 @@ urlpatterns = [
 #     path('detail/', ArticleDetailView.as_view(), name='detail'),
 #     path('delete/', ArticleDeleteView.as_view(), name='delete'),
 # ])),
-

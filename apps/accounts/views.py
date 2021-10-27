@@ -12,7 +12,6 @@ from django_registration.backends.activation.views import RegistrationView, Acti
 from apps.accounts.forms import UserLoginForm, UserRegistrationForm, UserModelForm, UserForm
 from apps.blogapp.models import Article
 
-
 # @login_required
 # def favourite_list(request):
 #     new = Article.objects.filter(favourites=request.user)
@@ -34,6 +33,9 @@ from apps.blogapp.task import load_from_json
 
 
 class FavouritesAddView(LoginRequiredMixin, View):
+    """
+    добавляет в избренное статью,если в избранном - удаляет
+    """
     def get(self, request, **kwargs):
         post = get_object_or_404(Article, slug=kwargs['slug'])
         if post.favourites.filter(id=request.user.id).exists():
@@ -85,6 +87,7 @@ class UserLoginView(LoginView):
 
 
 class UserLogoutView(LogoutView):
+
     def get_next_page(self):
         return reverse_lazy('blogapp:home')
 
@@ -103,6 +106,9 @@ class UserLogoutView(LogoutView):
 
 
 class ProfileDelete(LoginRequiredMixin, DeleteView):
+    """
+    Удаление профиля
+    """
     model = get_user_model()
     template_name = 'accounts/profile_delete.html'
     success_url = reverse_lazy('blogapp:home')
@@ -133,6 +139,9 @@ class ProfileDelete(LoginRequiredMixin, DeleteView):
 
 
 class SubList(LoginRequiredMixin, ListView):
+    """
+    Список подписчиков
+    """
     model = get_user_model()
     template_name = 'accounts/sub_list.html'
     paginate_by = 10
@@ -142,6 +151,9 @@ class SubList(LoginRequiredMixin, ListView):
 
 
 class FavList(LoginRequiredMixin, ListView):
+    """
+    список избранного
+    """
     model = Article
     template_name = 'accounts/favourite_list.html'
     paginate_by = 10
@@ -151,6 +163,9 @@ class FavList(LoginRequiredMixin, ListView):
 
 
 class UserRegistrationView(RegistrationView):
+    """
+    регистрация с отправкой письма на почту
+    """
     template_name = 'accounts/registration_form.html'
     form_class = UserForm
     email_body_template = 'accounts/activation_email_body.txt'
@@ -159,11 +174,16 @@ class UserRegistrationView(RegistrationView):
 
 
 class SuccessRegistrationView(TemplateView):
+    """
+    Успешная регистрация
+    """
     template_name = 'accounts/success_registration.html'
 
 
 class SubscribersAdd(LoginRequiredMixin, View):
-
+    """
+    Подписывает пользователя на автора статьи,если подписан - отписывает
+    """
     def get(self, request, **kwargs):
         author = get_user_model().objects.get(pk=kwargs['pk'])
         if self.request.user != author:
@@ -172,10 +192,13 @@ class SubscribersAdd(LoginRequiredMixin, View):
             else:
                 author.subscribers.add(self.request.user)
             author.save()
-        return HttpResponseRedirect(self.request.GET.get('next', ''))
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
 class UserActivationView(ActivationView):
+    """
+
+    """
     success_url = reverse_lazy('blogapp:home')
 
     def activate(self, *args, **kwargs):

@@ -17,10 +17,7 @@
       <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 
         <div style="margin: 50px;"><a href="{{ art.get_absolute_url }}">{{ art.name }}</a>
-        <p>{{art.descr}}</p>
-         {% if art.preview %}
-            <img src="{{art.preview.url}}" style="margin: 0 auto;display: block;max-width: 80%;">
-            {%endif%}
+            <p>{{art.descr}}</p>
             <p>{% translate "Рейтинг"  %}: {{art.rating}}</p>
             <p>{% translate "Дата изменения"  %}: {{art.date_edit}}</p>
           <div><img src="{{ art.author.get_photo_url }}" style="display: block;max-width: 10%;" class="img-responsive thumbnail " alt="img">
