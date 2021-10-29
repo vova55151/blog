@@ -48,7 +48,7 @@ class ArticleCreate(CreateAPIView):
         serializer.save(author=self.request.user)
 
 
-class ArticleUpdate(RetrieveUpdateAPIView):
+class ArticleUpdate(RetrieveUpdateDestroyAPIView):
     """
     Изменяет статью
     """
@@ -64,7 +64,8 @@ class ArticleDelete(DestroyAPIView):
     """
     queryset = Article.objects.all().order_by('-name')
     serializer_class = ArticleSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, ArticleAuthorAccessPermission]  # TODO:    "detail": "Метод
+    # TODO:  \"GET\" не разрешен.","status_code": 405. Нужна ли эта вьюха?
     lookup_field = 'slug'
 
 
