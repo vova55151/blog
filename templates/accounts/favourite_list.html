@@ -10,9 +10,10 @@
     {% breadcrumb tstring2 "accounts:subscribers_list"%}
 {% endblock %}
 {% render_breadcrumbs %}
+    <h1 style="margin: 5px 520px;display: block;max-width: 10%;">{% trans "Список избранного" %}</h1>
 {% for post in object_list %}
 
-    <h1>{% trans "Список избранного" %}</h1>
+
       <li class="list-group-item list-group-item-light" style="border: 1px solid #ddd; margin: 10px 200px; border-radius: 5px; padding: 10px 81px; list-style-type: none;background-color: #e3f2fd;">
 
         <div><a style="padding: 75px;" href="{{ post.get_absolute_url }}">{{ post.name }}</a></div>

@@ -11,10 +11,10 @@ from rest_framework import permissions
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
 
-from apps.blogapp.models import Article
+from apps.blogapp.models import Article, Image
 from apps.blogapp.task import send_email
 from apps.rest.permissions import ArticleAuthorAccessPermission
-from apps.rest.serializers import ArticleSerializer, UserSerializer
+from apps.rest.serializers import ArticleSerializer, UserSerializer, ImgSerializer
 
 
 class ArticleList(ListCreateAPIView):
@@ -45,10 +45,7 @@ class ArticleCreate(CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        print(self.request.data)
         serializer.save(author=self.request.user)
-        send_email(self.request.user.subscribers.all(), self.request.user,
-                   reverse_lazy('blogapp:detail', kwargs={'slug': self.request.data['slug']}))#TODO:'{'slug': ''}'
 
 
 class ArticleUpdate(RetrieveUpdateAPIView):
@@ -130,3 +127,15 @@ class UserDetailView(RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class ImageCreateView(CreateAPIView):  # TODO: вывести много форм?
+    """
+    Создание картинки
+    """
+    serializer_class = ImgSerializer
+    queryset = Article.objects.all()
+    lookup_field = 'slug'
+
+    def perform_create(self, serializer):
+        serializer.save(article=self.get_object())

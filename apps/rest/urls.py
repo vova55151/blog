@@ -19,10 +19,10 @@ urlpatterns = [
             path('detail/', ArticleDetail.as_view(), name='detail'),
             path('delete/', ArticleDelete.as_view(), name='delete'),
             path('fav/', FavouritesAddView.as_view(), name='favourite'),
+            path('add_images/', ImageCreateView.as_view(), name='add_images')
 
         ])),
         path('<int:pk>/sub/', SubscribersAdd.as_view(), name='subscribe'),
-
 
     ])),
 

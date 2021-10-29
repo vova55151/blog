@@ -7,7 +7,7 @@ import codecs
 from bs4 import BeautifulSoup as BS
 from random import randint
 
-from apps.blogapp.models import Article
+import apps.blogapp.models
 from blg.settings import BASE_DIR
 
 headers = [
@@ -73,7 +73,7 @@ def parse():
                         image_name2 = img2.rpartition('/')[2]
                         urllib.request.urlretrieve(img, f'/home/wcpc/proj/blog/media/{image_name}')
                         urllib.request.urlretrieve(img2, f'/home/wcpc/proj/blog/media/{image_name2}')
-                        if Article.objects.filter(name=name).exists():
+                        if apps.blogapp.models.Article.objects.filter(name=name).exists():
                             print('Статья уже существует')
                         else:
                             data.append(

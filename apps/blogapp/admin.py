@@ -13,7 +13,6 @@ from apps.accounts.models import User
 from apps.blogapp.models import Category, Article, Comment, Image
 from apps.menu.models import Menu
 
-
 class GroupInstanceInline(admin.TabularInline):
     model = Group
 
@@ -27,6 +26,22 @@ class CategoryNodeForm(MoveNodeForm):
 @admin.register(Category)
 class CategoryAdmin(TreeAdmin):
     form = movenodeform_factory(Category, CategoryNodeForm)
+
+
+@admin.action(description='Mark selected comments as published')
+def make_published(modeladmin, request, queryset):
+    queryset.update(status='P')
+
+
+@admin.action(description='Mark selected comments as draft')
+def make_dreaft(modeladmin, request, queryset):
+    queryset.update(status='D')
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['author', 'status', 'date_created']
+    actions = [make_published, make_dreaft]
 
 
 class CustomUserAdmin(SortableAdminMixin, UserAdmin):  # TODO: KeyError: "Key 'email' not found in 'UserForm'. Choices
@@ -55,7 +70,6 @@ class CustomUserAdmin(SortableAdminMixin, UserAdmin):  # TODO: KeyError: "Key 'e
 
 admin.site.register(User, CustomUserAdmin)
 
-admin.site.register(Comment)
 admin.site.register(Image)
 
 
@@ -63,7 +77,6 @@ class Imginline(SortableInlineAdminMixin, admin.TabularInline):
     model = Image
 
 
-# TODO : django admin sortable 2 что сортировать
 class Commentnline(admin.TabularInline):
     model = Comment
 

@@ -7,25 +7,29 @@ from django.contrib.auth.hashers import check_password
 from django.utils.translation import ugettext_lazy
 from django_registration.forms import RegistrationForm
 
+from apps.accounts.models import User
 
 class CustomUserCreationForm(UserCreationForm):
     """
     Переопределенная форма создания юзера
     """
 
+    email = forms.EmailField()
+
     class Meta:
         model = get_user_model()
-        fields = ('email',)
+        fields = '__all__'
 
 
 class CustomUserChangeForm(UserChangeForm):
     """
     Переопределенная форма смены юзера
     """
+    email = forms.EmailField()
 
     class Meta:
         model = get_user_model()
-        fields = ('email',)
+        fields = '__all__'
 
 
 class UserLoginForm(forms.Form):

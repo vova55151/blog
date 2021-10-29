@@ -29,13 +29,13 @@ from apps.blogapp.models import Article
 #         post.favourites.add(request.user)
 #     post.save()
 #     return HttpResponseRedirect(request.META['HTTP_REFERER'])
-from apps.blogapp.task import load_from_json
 
 
 class FavouritesAddView(LoginRequiredMixin, View):
     """
     добавляет в избренное статью,если в избранном - удаляет
     """
+
     def get(self, request, **kwargs):
         post = get_object_or_404(Article, slug=kwargs['slug'])
         if post.favourites.filter(id=request.user.id).exists():
@@ -184,7 +184,9 @@ class SubscribersAdd(LoginRequiredMixin, View):
     """
     Подписывает пользователя на автора статьи,если подписан - отписывает
     """
+
     def get(self, request, **kwargs):
+        print()
         author = get_user_model().objects.get(pk=kwargs['pk'])
         if self.request.user != author:
             if author.subscribers.filter(pk=self.request.user.pk).exists():
@@ -192,7 +194,7 @@ class SubscribersAdd(LoginRequiredMixin, View):
             else:
                 author.subscribers.add(self.request.user)
             author.save()
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        return HttpResponseRedirect(self.request.GET.get('next', f'{reverse_lazy("blogapp:home")}'))
 
 
 class UserActivationView(ActivationView):

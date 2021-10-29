@@ -4,13 +4,15 @@ from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Avg, Count
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy
 from treebeard.mp_tree import MP_Node
 
+from apps.blogapp.task import send_email
 from blg.utils import from_cyrillic_to_eng
 from const import statusl, ratingl
 
@@ -66,7 +68,7 @@ class Article(models.Model):
     likes_count = models.IntegerField(default=0, verbose_name=ugettext_lazy('Количество лайков'))
     date_created = models.DateTimeField(auto_now_add=True, verbose_name=ugettext_lazy('Дата создания'))
     date_edit = models.DateTimeField(auto_now=True, verbose_name=ugettext_lazy('Дата обновления'))
-    recommended = models.ManyToManyField(blank=True,to='Article', related_name='recommendation',
+    recommended = models.ManyToManyField(blank=True, to='Article', related_name='recommendation',
                                          verbose_name=ugettext_lazy('Рекомендуемые статьи'))
     my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
 
@@ -82,6 +84,8 @@ class Article(models.Model):
         """
         if not self.slug:
             self.slug = from_cyrillic_to_eng(str(self.name))
+        send_email.delay(self.author.pk, str(str(Site.objects.get_current()) + reverse_lazy('blogapp:detail', kwargs={
+            'slug': str(self.slug)})))  # TODO: вызывается при изменении likes_count,comments_count,rating и т.д
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -120,7 +124,7 @@ class Comment(models.Model):
     """
     author = models.ForeignKey(to=get_user_model(), verbose_name=ugettext_lazy('Автор'), on_delete=models.SET_NULL,
                                null=True)
-    article = models.ForeignKey(to=Article, on_delete=models.SET_NULL, verbose_name=ugettext_lazy('Статья'),
+    article = models.ForeignKey(to=Article, on_delete=models.CASCADE, verbose_name=ugettext_lazy('Статья'),
                                 null=True)
 
     status = models.CharField(choices=statusl, max_length=100, verbose_name=ugettext_lazy('Статус'), default='P')
@@ -133,7 +137,7 @@ class Comment(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Добавляет слаг,считает кол-во комментариев,средний рейтинг поста
+        Cчитает кол-во комментариев,средний рейтинг поста
         """
         model_class = self._meta.model
         object_list = model_class.objects.filter(article=self.article, status="P")
@@ -143,19 +147,3 @@ class Comment(models.Model):
             self.article.comments_count = Comment.objects.all().filter(article=self.article, status="P").count()
             self.article.save()
         super().save()
-
-# class TextPage(models.Model):
-#     """
-#     ???
-#     """
-#     name = models.CharField(max_length=255, verbose_name=ugettext_lazy('Название'))
-#     slug = models.SlugField(unique=True)
-#     statusl = [
-#         ('D', 'Draft'),
-#         ('P', 'Published')
-#     ]
-#     status = models.CharField(choices=statusl, max_length=255,
-#                               verbose_name=ugettext_lazy('Статус обращения'))  # Селект Draft Published
-#
-#     date_created = models.DateTimeField(auto_now_add=True)
-#     date_edit = models.DateTimeField(auto_now=True)

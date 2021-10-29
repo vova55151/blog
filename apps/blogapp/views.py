@@ -12,7 +12,7 @@ from django_filters.views import FilterView
 from apps.accounts.forms import UserModelForm
 from apps.blogapp.forms import *
 from apps.blogapp.models import *
-from apps.blogapp.task import send_email, load_from_json
+from apps.blogapp.task import send_email, load_from_json, pars
 from filter import Filter
 
 from parser.parser import parse
@@ -48,7 +48,7 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
         object = self.get_object()
         if self.request.user.is_authenticated:
             if get_user_model().objects.get(pk=object.author.pk).subscribers.filter(
-                    pk=self.request.user.pk).exists():  # TODO: вынести,передать реквест и юзера
+                    pk=self.request.user.pk).exists():
                 context["Sub"] = True
             else:
                 context["Sub"] = False
@@ -56,7 +56,7 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
                 context["Fav"] = True
             else:
                 context["Fav"] = False
-        context['recommended'] = self.object.recommended.all()
+        context['recommended'] = self.object.recommended.all()  # TODO : пагинация,слайсинг?
         # Article.objects.filter(category=object.category).exclude(id=object.id)[0:5]
         context['comment_form'] = CommentModelForm()
 
@@ -65,12 +65,15 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
 
 class RunTaskParse(LoginRequiredMixin, View):
     def get(self, request, **kwargs):
-        parse()
-        load_from_json(self.request.user)
-        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+        pars.delay()
+        load_from_json.delay(self.request.user)
+        return reverse_lazy('blogapp:home')
 
 
-class CommentCreateView(LoginRequiredMixin, CreateView):
+class CommentCreateView(LoginRequiredMixin, CreateView):  # TODO : rest
+    """
+    Создание комментария
+    """
     model = Comment
     form_class = CommentModelForm
     template_name = 'blogapp/comment_create.html'
@@ -125,7 +128,7 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         """
         Обрабатывает запросы POST, создавая экземпляр формы и его встроенные наборы форм с переданными переменными POST
-         Возвращает методы валидации формы
+        Возвращает методы валидации формы
         """
         self.object = None
         form_class = self.get_form_class()
@@ -141,15 +144,12 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
         """
         Присваивает посту автора и рассылает имейлы его подписчикам
         """
-
         self.object = form.save(commit=False)
         self.object.author = self.request.user
         self.object = form.save()
         for i in img_inline:
             if i.cleaned_data:
                 i.save()
-        send_email(self.object.author.subscribers.all(), self.object.author, self.get_success_url())
-
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form, img_inline):
@@ -169,7 +169,6 @@ class ArticleUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'blogapp/article_update.html'
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
         context['img_inline'] = Img_inline(self.request.POST or None, self.request.FILES or None, instance=self.object)
         return context
@@ -202,7 +201,7 @@ class UserArticleList(LoginRequiredMixin, ListView):
     paginate_by = 10
     template_name = 'blogapp/article_user_list.html'
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, object_list=None, **kwargs):
         context = super().get_context_data()
         context['pass_change'] = PasswordChangeForm(self.request.user)
         context['user_form'] = UserModelForm(instance=self.request.user)
