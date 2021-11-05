@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-!3-n@f5dau6s^v(p*v6du51$x2+0aj9m0qadayjydva2q5*kog
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['blogwc.herokuapp.com']
+ALLOWED_HOSTS = ['blogwc.herokuapp.com', ]
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -75,7 +75,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
 ]
-
 
 ROOT_URLCONF = 'blg.urls'
 
