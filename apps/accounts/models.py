@@ -20,14 +20,12 @@ class User(AbstractUser):
     email = models.EmailField(verbose_name=ugettext_lazy('email address'), unique=True)
     img = models.ImageField(blank=True, null=True, verbose_name=ugettext_lazy('Фото профиля'))
     USERNAME_FIELD = 'email'
-    EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     objects = CustomUserManager()
-    my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
 
-    class Meta(object):
-        ordering = ['my_order']
+    class Meta:
+        ordering = ['-email']
 
     def __str__(self):
         """
@@ -51,7 +49,3 @@ class User(AbstractUser):
         Возвращает юрл информации о пользователе
         """
         return reverse('accounts:profile')
-
-
-
-

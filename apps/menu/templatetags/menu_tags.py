@@ -6,13 +6,13 @@ register = template.Library()
 
 
 @register.simple_tag
-def headermenu(request):
-    return Menu.objects.filter(pos='H')
+def headermenu():
+    return Menu.objects.filter(pos='H', show=True)
 
 
 @register.simple_tag
-def footerermenu(request):
-    return Menu.objects.filter(pos='F')
+def footerermenu():
+    return Menu.objects.filter(pos='F', show=True)
 
 
 @register.simple_tag(takes_context=True)

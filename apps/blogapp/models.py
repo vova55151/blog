@@ -10,10 +10,11 @@ from django.db import models
 from django.db.models import Avg, Count
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy
+from django_unique_slugify import unique_slugify
+from slugify import slugify
 from treebeard.mp_tree import MP_Node
 
 from apps.blogapp.task import send_email
-from blg.utils import from_cyrillic_to_eng
 from const import statusl, ratingl
 
 
@@ -38,7 +39,7 @@ class Category(MP_Node):
         Добавляет слаг
         """
         if not self.slug:
-            self.slug = from_cyrillic_to_eng(str(self.name))
+            unique_slugify(self, slugify(self.name))
 
         super().save(*args, **kwargs)
 
@@ -83,9 +84,12 @@ class Article(models.Model):
         Добавляет слаг
         """
         if not self.slug:
-            self.slug = from_cyrillic_to_eng(str(self.name))
-        send_email.delay(self.author.pk, str(str(Site.objects.get_current()) + reverse_lazy('blogapp:detail', kwargs={
-            'slug': str(self.slug)})))  # TODO: вызывается при изменении likes_count,comments_count,rating и т.д
+            unique_slugify(self, slugify(self.name))
+            send_email.delay(self.author.pk,
+                             str(str(Site.objects.get_current()) + reverse_lazy('blogapp:detail', kwargs={
+                                 'slug': str(
+                                     self.slug)})))
+
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -134,6 +138,9 @@ class Comment(models.Model):
     text = RichTextField(verbose_name=ugettext_lazy('Контент'))
     date_created = models.DateTimeField(auto_now_add=True)
     date_edit = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-author']
 
     def save(self, *args, **kwargs):
         """

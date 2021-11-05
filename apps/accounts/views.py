@@ -9,7 +9,7 @@ from django.views import View
 from django.views.generic import DetailView, DeleteView, UpdateView, TemplateView, ListView
 from django_registration.backends.activation.views import RegistrationView, ActivationView
 
-from apps.accounts.forms import UserLoginForm, UserRegistrationForm, UserModelForm, UserForm
+from apps.accounts.forms import UserForm
 from apps.blogapp.models import Article
 
 # @login_required

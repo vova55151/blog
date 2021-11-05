@@ -15,6 +15,10 @@ class ArticleModelForm(forms.ModelForm):
         model = Article
         fields = ['name', 'descr', 'category', 'content', 'slug', 'preview', 'comments_count', 'likes_count']
 
+    # def is_valid(self):
+    #     print(self.errors)
+    #     return super().is_valid()
+
     # def clean_name(self):
     #     """
     #     Вызывается при отправке формы.Проверяет ,есть ли аналогичное название поста в БД

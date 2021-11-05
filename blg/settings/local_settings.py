@@ -179,16 +179,16 @@ LOCALE_PATHS = (
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# SENDGRID_API_KEY = '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'
-# EMAIL_HOST = 'smtp.sendgrid.net'
-# EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
-# EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# DEFAULT_FROM_EMAIL = 'wc.for.sendgrid@gmail.com'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+SENDGRID_API_KEY = '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'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey'  # this is exactly the value 'apikey'
+EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'wc.for.sendgrid@gmail.com'
 
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'

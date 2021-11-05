@@ -1,10 +1,11 @@
+from typing import Union
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.template.response import TemplateResponse
 from django.views import View
 from django.views.generic import DetailView, CreateView, ListView, UpdateView, DeleteView
 from django.views.generic.list import MultipleObjectMixin
@@ -12,10 +13,8 @@ from django_filters.views import FilterView
 from apps.accounts.forms import UserModelForm
 from apps.blogapp.forms import *
 from apps.blogapp.models import *
-from apps.blogapp.task import send_email, load_from_json, pars
+from apps.blogapp.task import load_from_json, pars
 from filter import Filter
-
-from parser.parser import parse
 
 
 class ArticleListView(FilterView):
@@ -36,9 +35,6 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
     template_name = 'blogapp/article_detail.html'
     paginate_by = 8
 
-    def get_success_url(self):
-        return reverse_lazy('blogapp:detail', kwargs={'slug': self.get_object().slug})
-
     def get_context_data(self, **kwargs):
         """
         Проверка на подписку и избранное
@@ -56,21 +52,14 @@ class ArticleDetailView(LoginRequiredMixin, MultipleObjectMixin, DetailView):
                 context["Fav"] = True
             else:
                 context["Fav"] = False
-        context['recommended'] = self.object.recommended.all()  # TODO : пагинация,слайсинг?
+        context['recommended'] = self.object.recommended.all()[0:5]
         # Article.objects.filter(category=object.category).exclude(id=object.id)[0:5]
         context['comment_form'] = CommentModelForm()
 
         return context
 
 
-class RunTaskParse(LoginRequiredMixin, View):
-    def get(self, request, **kwargs):
-        pars.delay()
-        load_from_json.delay(self.request.user)
-        return reverse_lazy('blogapp:home')
-
-
-class CommentCreateView(LoginRequiredMixin, CreateView):  # TODO : rest
+class CommentCreateView(LoginRequiredMixin, CreateView):
     """
     Создание комментария
     """
@@ -78,15 +67,14 @@ class CommentCreateView(LoginRequiredMixin, CreateView):  # TODO : rest
     form_class = CommentModelForm
     template_name = 'blogapp/comment_create.html'
 
-    def get_object(self) -> Article:
+    def get_object(self,queryset=None) -> Article:
         """
         :return: Article
         """
-        return super().get_object(
-            queryset=Article.objects.all()
-        )
+        queryset = Article.objects.all()
+        return super().get_object(queryset)
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> HttpResponseRedirect:
         """
         Присваивает комментарию автора и статью
         :param form:
@@ -108,11 +96,10 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
     """
     model = Article
     form_class = ArticleModelForm
-    success_url = reverse_lazy('blogapp:home')
     template_name = 'blogapp/article_create.html'
 
     # c img inline
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs) -> TemplateResponse:
         """
         Обрабатывает запросы GET
         Возвращает пустую форму и ее встроенные наборы форм.
@@ -125,7 +112,7 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
             self.get_context_data(form=form,
                                   img_inline=img_inline, ))
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> Union[HttpResponseRedirect, TemplateResponse]:
         """
         Обрабатывает запросы POST, создавая экземпляр формы и его встроенные наборы форм с переданными переменными POST
         Возвращает методы валидации формы
@@ -134,25 +121,27 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         img_inline = Img_inline(self.request.POST, self.request.FILES, instance=form.instance)
+        load_from_json()
         if form.is_valid() and img_inline.is_valid():
 
             return self.form_valid(form, img_inline)
         else:
             return self.form_invalid(form, img_inline)
 
-    def form_valid(self, form, img_inline):
+    def form_valid(self, form, img_inline) -> HttpResponseRedirect:
         """
         Присваивает посту автора и рассылает имейлы его подписчикам
         """
         self.object = form.save(commit=False)
         self.object.author = self.request.user
-        self.object = form.save()
+        # self.object = form.save()
+        self.object.save()
         for i in img_inline:
             if i.cleaned_data:
                 i.save()
         return HttpResponseRedirect(self.get_success_url())
 
-    def form_invalid(self, form, img_inline):
+    def form_invalid(self, form, img_inline) -> TemplateResponse:
         return self.render_to_response(self.get_context_data(form=form, img_inline=img_inline))
 
     def get_success_url(self):

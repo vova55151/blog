@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 
-from apps.blogapp.models import Article, Image
+from apps.blogapp.models import Article, Image, Comment
 
 
 class ImgSerializer(serializers.ModelSerializer):
@@ -11,15 +11,29 @@ class ImgSerializer(serializers.ModelSerializer):
         fields = ['img', 'alt']
 
 
-class ArticleSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['text', 'rating']
+
+
+class ArticleSerializerDetail(serializers.ModelSerializer):
     image_set = ImgSerializer(many=True, read_only=True)
+    comment_set = CommentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Article
-        fields = ['name', 'descr', 'category', 'content', 'slug', 'preview', 'image_set', 'comments_count',
+        fields = ['name', 'descr', 'category', 'content', 'slug', 'preview', 'image_set', 'comment_set',
+                  'comments_count','likes_count']
+
+
+class ArticleSerializerList(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ['name', 'descr', 'category', 'content', 'preview', 'comments_count',
                   'likes_count']
 
-    # def create(self, validated_data):  # TODO : создавать картинки в отдельной вьюхе
+    # def create(self, validated_data):
     #     imgs = validated_data.pop('image_set')
     #     article = Article.objects.create(**validated_data)
     #     for img in imgs:
@@ -35,6 +49,8 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(read_only=True)
+
     class Meta:
         model = get_user_model()
         fields = ['first_name', 'last_name', 'phone', 'img', 'email']

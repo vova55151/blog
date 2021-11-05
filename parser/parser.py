@@ -21,7 +21,6 @@ headers = [
 ]
 
 
-# TODO : python-slugify django-unique-slugify
 # TODO : rosetta
 # TODO : https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/
 def parse():
@@ -50,23 +49,12 @@ def parse():
                         page_main = soup.find('div', attrs={'class': 'page-main'})
                         date_created = page_main.find('div', attrs={'class': 'article-head__details'}).find('time').text
                         name = page_main.find('div', attrs={'class': 'article-head__title'}).text
-                        # with open('data.json', 'r') as data:
-                        #
-                        #     dataset = json.load(data)
-                        #     print(dataset)
-                        #     for lst in dataset:
-                        #         print(lst[0])
-                        #         if name in lst[0]['name']:
-                        #             print('работает')
-                        #             break
-
                         descr = page_main.find('div', attrs={'class': 'article-head__subtitle'}).text
                         content_p = page_main.find_all('p')
                         content = []
                         for i in content_p:
                             content.append(i.text)
                         content = ' '.join(content)
-
                         img = page_main.find('div', attrs={'class': 'article-head__photo'}).img['src']
                         img2 = page_main.find('div', attrs={'class': 'content-photo'}).img['src']
                         image_name = img.rpartition('/')[2]
@@ -89,5 +77,5 @@ def parse():
                             )
                     except Exception as e:
                         pass
-    with open('data.json', 'a') as file:
+    with open('data.json', 'w') as file:
         json.dump(data, file, ensure_ascii=False, indent=2)

@@ -81,7 +81,7 @@
 
 <br>
 <br>
-<form method="post" action= "{% url 'blogapp:comment' object.id %}">
+<form method="post" action= "{% url 'blogapp:comment' object.slug %}">
     {%  csrf_token %}
     {{ comment_form }}
 

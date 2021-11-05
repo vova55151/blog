@@ -13,6 +13,7 @@ from apps.accounts.models import User
 from apps.blogapp.models import Category, Article, Comment, Image
 from apps.menu.models import Menu
 
+
 class GroupInstanceInline(admin.TabularInline):
     model = Group
 
@@ -44,9 +45,7 @@ class CommentAdmin(admin.ModelAdmin):
     actions = [make_published, make_dreaft]
 
 
-class CustomUserAdmin(SortableAdminMixin, UserAdmin):  # TODO: KeyError: "Key 'email' not found in 'UserForm'. Choices
-    # TODO: are: img, is_active, is_staff, password1, password2, user_permissions."
-
+class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = get_user_model()
@@ -83,6 +82,7 @@ class Commentnline(admin.TabularInline):
 
 @admin.register(Article)
 class ArticleAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_filter = ('author',)
     list_display = ('name', 'slug', 'author', 'category', 'descr', 'rating',
                     'comments_count', 'likes_count', 'date_created', 'date_edit')
     inlines = (Imginline, Commentnline)

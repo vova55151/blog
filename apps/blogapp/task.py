@@ -3,10 +3,11 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy
+from django_unique_slugify import unique_slugify
+from slugify import slugify
 
 import apps.blogapp.models
 from blg.celery import app
-from blg.utils import from_cyrillic_to_eng
 from parser.parser import parse
 
 
@@ -17,7 +18,7 @@ def send_email(author_pk, url):
     """
     author = get_user_model().objects.filter(pk=author_pk).first()
     for user in author.subscribers.all():
-        user.email_user(ugettext_lazy('Новая статья'),  # TODO: проверить через sendgrid(перед этим убрать расслку из сейва)
+        user.email_user(ugettext_lazy('Новая статья'),  # TODO: проверить через sendgrid
                         ugettext_lazy(f'{user.email},{author} выложил новую статью.{url}'), 'from_email@test.com')
 
 
@@ -39,7 +40,7 @@ def load_from_json():
             category = apps.blogapp.models.Category.objects.filter(name=lst[2]['category']).first()
             if apps.blogapp.models.Category.objects.filter(name=lst[2]['category']).exists():
                 article = apps.blogapp.models.Article(name=lst[0]['name'],
-                                                      slug=from_cyrillic_to_eng(lst[0]['name']),
+                                                      slug=slugify(lst[0]['name']),
                                                       category=category,
                                                       preview=lst[4]['img'].rpartition('/')[2],
                                                       descr=lst[1]['descr'],
@@ -49,14 +50,13 @@ def load_from_json():
                 apps.blogapp.models.Image(img=lst[5]['img2'].rpartition('/')[2],
                                           alt=str(uuid.uuid4()),
                                           article=article).save()
-                print(article)
             else:
                 category = apps.blogapp.models.Category(name=lst[2]['category'],
-                                                        slug=from_cyrillic_to_eng(lst[2]['category']),
+                                                        slug=slugify(lst[0]['name']),
                                                         depth=1,
                                                         path=str(uuid.uuid4()), ).save()
                 article = apps.blogapp.models.Article(name=lst[0]['name'],
-                                                      slug=from_cyrillic_to_eng(lst[0]['name']),
+                                                      slug=slugify(lst[0]['name']),
                                                       category=category,
                                                       preview=lst[4]['img'].rpartition('/', )[2],
                                                       descr=lst[1]['descr'],
@@ -66,4 +66,3 @@ def load_from_json():
                 apps.blogapp.models.Image(img=lst[5]['img2'].rpartition('/')[2],
                                           alt=str(uuid.uuid4()),
                                           article=article).save()
-                print(article)

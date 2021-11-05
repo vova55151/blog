@@ -2,8 +2,9 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy
+from django_unique_slugify import unique_slugify
+from slugify import slugify
 
-from blg.utils import from_cyrillic_to_eng
 from const import targets, posl
 
 
@@ -15,7 +16,7 @@ class Menu(models.Model):
                               default="_self")
     pos = models.CharField(choices=posl, max_length=20, verbose_name=ugettext_lazy('Позиция меню'))
     show = models.BooleanField(verbose_name=ugettext_lazy('Отображать'),
-                               choices=((False, ugettext_lazy('Отображать')), (True, ugettext_lazy('Не отображать'))))
+                               choices=((True, ugettext_lazy('Отображать')), (False, ugettext_lazy('Не отображать'))))
     my_order = models.PositiveIntegerField(default=0, blank=False, null=False)
 
     class Meta(object):
@@ -39,7 +40,7 @@ class TextPage(models.Model):
         Добавляет слаг
         """
         if not self.slug:
-            self.slug = from_cyrillic_to_eng(str(self.name))
+            unique_slugify(self, slugify(self.title))
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
